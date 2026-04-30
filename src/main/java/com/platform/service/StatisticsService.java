@@ -23,7 +23,8 @@ public class StatisticsService {
     private final ServiceRecordRepository serviceRepository;
 
     private static final String STATS_KEY_PREFIX = "stats:";
-    private static final Duration CACHE_DURATION = Duration.ofMinutes(5);
+    @SuppressWarnings("null")
+    private static final @NonNull Duration CACHE_DURATION = Duration.ofMinutes(5);
 
     public StatisticsService(
             RedisTemplate<String, Object> redisTemplate,
@@ -77,7 +78,7 @@ public class StatisticsService {
         stats.put("servicesByType", getServiceTypeCounts());
 
         // Cache the results
-        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
         
         return stats;
     }
@@ -97,7 +98,7 @@ public class StatisticsService {
         stats.put("byStatus", getVehicleStatusCounts());
         stats.put("byMake", getVehicleMakeCounts());
 
-        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
         return stats;
     }
 
@@ -116,7 +117,7 @@ public class StatisticsService {
         stats.put("byStatus", getDealerStatusCounts());
         stats.put("byState", getDealerStateCounts());
 
-        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
         return stats;
     }
 
