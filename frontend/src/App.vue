@@ -29,6 +29,20 @@ const hasResult = computed(() => Boolean(result.value));
 const hasValidationErrors = computed(() => result.value?.errors?.length > 0);
 const uploadDisabled = computed(() => !selectedFile.value || isUploading.value);
 
+const healthStatusColor = computed(() => {
+  switch (healthStatus.value) {
+    case "Online":
+      return "bg-green-500";
+    case "Checking":
+      return "bg-yellow-500";
+    case "Unavailable":
+    case "Not checked":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
+  }
+});
+
 function handleFileChange(event) {
   selectedFile.value = event.target.files?.[0] ?? null;
   result.value = null;
@@ -38,6 +52,9 @@ function handleFileChange(event) {
 // Quick connectivity check for operators before attempting an upload.
 async function checkHealth() {
   healthStatus.value = "Checking";
+
+  // Add a small delay to make the checking animation more visible
+  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   try {
     const response = await fetch("/health");
@@ -60,8 +77,8 @@ async function uploadFile() {
   formData.append("file", selectedFile.value);
 
   try {
-    // The Vite proxy forwards this to the Spring Boot upload endpoint.
-    const response = await fetch("/api/upload", {
+    // Call backend directly to bypass proxy chunk encoding issues
+    const response = await fetch("http://localhost:8081/api/upload", {
       method: "POST",
       body: formData,
     });
@@ -112,9 +129,18 @@ async function uploadFile() {
               <Server class="h-4 w-4 text-[#1d6f78]" />
               API
             </div>
-            <p class="mt-2 text-xl font-semibold text-[#17202a]">
-              {{ healthStatus }}
-            </p>
+            <div class="mt-2 flex items-center gap-3">
+              <div
+                class="h-4 w-4 rounded-full transition-all duration-300"
+                :class="[
+                  healthStatusColor,
+                  healthStatus === 'Checking' ? 'animate-pulse' : '',
+                ]"
+              ></div>
+              <p class="text-xl font-semibold text-[#17202a]">
+                {{ healthStatus }}
+              </p>
+            </div>
           </div>
           <button
             class="rounded-md bg-[#17202a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#263442] hover:cursor-pointer disabled:bg-[#7b8791]"

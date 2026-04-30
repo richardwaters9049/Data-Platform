@@ -52,6 +52,10 @@ The backend container connects to PostgreSQL using the Compose service name `pos
 
 Validation was run with `docker compose config`, `./mvnw test`, `bun run build`, and `docker compose build`; all passed. The full stack was not started because local development processes were already using ports `8081` and `5173`.
 
+03:16 - Upload CSV button functionality fixed.
+
+The upload functionality was already implemented in the frontend but wasn't working due to a Vite proxy chunked transfer encoding issue with multipart/form-data requests. Fixed by configuring the frontend to call the backend directly at `http://localhost:8081/api/upload` instead of using the proxy. The upload now successfully processes CSV files and returns validation results.
+
 Next planned step:
 
 Refactor the backend import schema towards automotive data such as vehicle, dealer, warranty, fleet, or service records. Then add Redis-backed summary/query behaviour and expose a simple endpoint to list imported records or return import statistics.
