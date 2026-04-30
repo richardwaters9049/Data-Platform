@@ -1,0 +1,13 @@
+[Client]
+   |
+   v
+[Spring Boot API]
+   |
+   v
+[Service Layer]
+   |
+   v
+[JPA / Hibernate]
+   |
+   v
+[PostgreSQL (Docker)]
