@@ -105,8 +105,11 @@ public class AutomotivePipelineService {
         String[] parts = ingestionService.parseCsvStructure(rawRow, dataType);
         if (parts == null) {
             String[] expectedFields = dataType.getSchemaFields();
-            errors.add(new ImportError(rowNumber, "row", 
-                String.format("Expected %d columns: %s", expectedFields.length, String.join(",", expectedFields))));
+            String actualColumns = String.format("Found %d columns", rawRow.split(",").length);
+            errors.add(ImportError.withColumn(rowNumber, "row", 
+                String.format("CSV structure error: Expected %d columns (%s) but %s", 
+                    expectedFields.length, String.join(",", expectedFields), actualColumns), 
+                "CSV Structure", rawRow));
             return PipelineResult.failure(errors);
         }
 

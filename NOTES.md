@@ -188,6 +188,63 @@ pipeline/AutomotivePipelineService.java      # ETL orchestrator
 
 ---
 
+### **15:45** - Enhanced Validation Error Reporting Completed
+
+Implemented comprehensive validation error reporting with exact CSV location details to help users identify and fix data issues more effectively.
+
+**Enhanced ImportError DTO:**
+
+- Added `columnName` field for readable column names (e.g., "VIN" instead of "vin")
+- Added `csvLine` field for complete CSV line content
+- Maintained backward compatibility with existing constructors
+- Added helper methods `withColumn()` and `withLine()` for enhanced error creation
+
+**Detailed Validation Messages:**
+
+- **Before**: `"Year must be between 1900 and 2100"`
+- **After**: `"Year '1850' must be between 1900 and 2100"`
+
+**Comprehensive Error Context:**
+
+- Row number for exact line location
+- Column name for human-readable field identification
+- Specific problematic values in error messages
+- Complete CSV line content for debugging
+
+**Example Enhanced Error:**
+
+```json
+{
+  "rowNumber": 5,
+  "field": "year",
+  "message": "Year '1850' must be between 1900 and 2100",
+  "columnName": "Year",
+  "csvLine": "1HGCM82633A123456,Honda,Civic,1850,EX,Blue,Gas,AUTO,1.8,Sedan,D001,ACTIVE"
+}
+```
+
+**Files Updated:**
+
+- `ImportError.java` - Enhanced DTO with new fields and helper methods
+- `AutomotiveDataValidator.java` - All validation methods with detailed reporting
+- `AutomotivePipelineService.java` - CSV structure validation with column context
+
+**Benefits:**
+
+- Users can pinpoint exact error locations in CSV files
+- Specific problematic values shown in error messages
+- Human-readable column names improve usability
+- Complete CSV line context for efficient debugging
+- Backward compatible with existing integrations
+
+**Verification:**
+
+- Build successful with 32 source files
+- All validation methods enhanced with detailed error reporting
+- Ready for improved user experience in CSV data validation
+
+---
+
 ## **Next Planned Step**
 
 Refactor backend import schema for automotive data (vehicle, dealer, warranty, fleet, service records). Add Redis-backed summary/query behavior and expose endpoints for listing imported records and statistics.

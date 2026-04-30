@@ -18,7 +18,7 @@ import java.util.List;
 public class AutomotiveDataValidator {
 
     /**
-     * Validates vehicle data fields.
+     * Validates vehicle data fields with enhanced error reporting.
      * 
      * @param parts Raw CSV field values
      * @param rowNumber Row number for error reporting
@@ -32,32 +32,38 @@ public class AutomotiveDataValidator {
         String model = parts[2].trim();
         String yearText = parts[3].trim();
         String engineSizeText = parts[8].trim();
-
-        // Required field validation
-        if (vin.isBlank()) errors.add(new ImportError(rowNumber, "vin", "VIN is required"));
-        if (make.isBlank()) errors.add(new ImportError(rowNumber, "make", "Make is required"));
-        if (model.isBlank()) errors.add(new ImportError(rowNumber, "model", "Model is required"));
         
-        // Year validation
+        // Reconstruct CSV line for error context
+        String csvLine = String.join(",", parts);
+
+        // Required field validation with column names
+        if (vin.isBlank()) errors.add(ImportError.withColumn(rowNumber, "vin", "VIN is required", "VIN", csvLine));
+        if (make.isBlank()) errors.add(ImportError.withColumn(rowNumber, "make", "Make is required", "Make", csvLine));
+        if (model.isBlank()) errors.add(ImportError.withColumn(rowNumber, "model", "Model is required", "Model", csvLine));
+        
+        // Year validation with specific error messages
         if (yearText.isBlank()) {
-            errors.add(new ImportError(rowNumber, "year", "Year is required"));
+            errors.add(ImportError.withColumn(rowNumber, "year", "Year is required", "Year", csvLine));
         } else {
             try {
                 int year = Integer.parseInt(yearText);
                 if (year < 1900 || year > 2100) {
-                    errors.add(new ImportError(rowNumber, "year", "Year must be between 1900 and 2100"));
+                    errors.add(ImportError.withColumn(rowNumber, "year", 
+                        String.format("Year '%s' must be between 1900 and 2100", yearText), "Year", csvLine));
                 }
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "year", "Year must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "year", 
+                    String.format("Year '%s' is not a valid number", yearText), "Year", csvLine));
             }
         }
 
-        // Engine size validation (optional)
+        // Engine size validation (optional) with specific error messages
         if (!engineSizeText.isBlank()) {
             try {
                 Double.parseDouble(engineSizeText);
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "engineSize", "Engine size must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "engineSize", 
+                    String.format("Engine size '%s' is not a valid number", engineSizeText), "Engine Size", csvLine));
             }
         }
 
@@ -65,22 +71,25 @@ public class AutomotiveDataValidator {
     }
 
     /**
-     * Validates dealer data fields.
+     * Validates dealer data fields with enhanced error reporting.
      */
     public List<ImportError> validateDealer(String[] parts, int rowNumber) {
         List<ImportError> errors = new ArrayList<>();
         
         String code = parts[0].trim();
         String name = parts[1].trim();
+        
+        // Reconstruct CSV line for error context
+        String csvLine = String.join(",", parts);
 
-        if (code.isBlank()) errors.add(new ImportError(rowNumber, "code", "Dealer code is required"));
-        if (name.isBlank()) errors.add(new ImportError(rowNumber, "name", "Dealer name is required"));
+        if (code.isBlank()) errors.add(ImportError.withColumn(rowNumber, "code", "Dealer code is required", "Dealer Code", csvLine));
+        if (name.isBlank()) errors.add(ImportError.withColumn(rowNumber, "name", "Dealer name is required", "Dealer Name", csvLine));
 
         return errors;
     }
 
     /**
-     * Validates warranty data fields.
+     * Validates warranty data fields with enhanced error reporting.
      */
     public List<ImportError> validateWarranty(String[] parts, int rowNumber) {
         List<ImportError> errors = new ArrayList<>();
@@ -90,15 +99,19 @@ public class AutomotiveDataValidator {
         String endDateText = parts[3].trim();
         String mileageLimitText = parts[4].trim();
         String deductibleText = parts[6].trim();
+        
+        // Reconstruct CSV line for error context
+        String csvLine = String.join(",", parts);
 
-        if (warrantyNumber.isBlank()) errors.add(new ImportError(rowNumber, "warrantyNumber", "Warranty number is required"));
+        if (warrantyNumber.isBlank()) errors.add(ImportError.withColumn(rowNumber, "warrantyNumber", "Warranty number is required", "Warranty Number", csvLine));
 
-        // Date validation
+        // Date validation with specific error messages
         if (!startDateText.isBlank()) {
             try {
                 LocalDate.parse(startDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             } catch (Exception e) {
-                errors.add(new ImportError(rowNumber, "startDate", "Start date must be in yyyy-MM-dd format"));
+                errors.add(ImportError.withColumn(rowNumber, "startDate", 
+                    String.format("Start date '%s' must be in yyyy-MM-dd format", startDateText), "Start Date", csvLine));
             }
         }
 
@@ -106,16 +119,18 @@ public class AutomotiveDataValidator {
             try {
                 LocalDate.parse(endDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             } catch (Exception e) {
-                errors.add(new ImportError(rowNumber, "endDate", "End date must be in yyyy-MM-dd format"));
+                errors.add(ImportError.withColumn(rowNumber, "endDate", 
+                    String.format("End date '%s' must be in yyyy-MM-dd format", endDateText), "End Date", csvLine));
             }
         }
 
-        // Numeric validation
+        // Numeric validation with specific error messages
         if (!mileageLimitText.isBlank()) {
             try {
                 Integer.parseInt(mileageLimitText);
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "mileageLimit", "Mileage limit must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "mileageLimit", 
+                    String.format("Mileage limit '%s' must be a valid number", mileageLimitText), "Mileage Limit", csvLine));
             }
         }
 
@@ -123,7 +138,8 @@ public class AutomotiveDataValidator {
             try {
                 Double.parseDouble(deductibleText);
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "deductible", "Deductible must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "deductible", 
+                    String.format("Deductible '%s' must be a valid number", deductibleText), "Deductible", csvLine));
             }
         }
 
@@ -131,7 +147,7 @@ public class AutomotiveDataValidator {
     }
 
     /**
-     * Validates fleet data fields.
+     * Validates fleet data fields with enhanced error reporting.
      */
     public List<ImportError> validateFleet(String[] parts, int rowNumber) {
         List<ImportError> errors = new ArrayList<>();
@@ -139,18 +155,23 @@ public class AutomotiveDataValidator {
         String fleetCode = parts[0].trim();
         String fleetName = parts[1].trim();
         String vehicleCountText = parts[10].trim();
+        
+        // Reconstruct CSV line for error context
+        String csvLine = String.join(",", parts);
 
-        if (fleetCode.isBlank()) errors.add(new ImportError(rowNumber, "fleetCode", "Fleet code is required"));
-        if (fleetName.isBlank()) errors.add(new ImportError(rowNumber, "fleetName", "Fleet name is required"));
+        if (fleetCode.isBlank()) errors.add(ImportError.withColumn(rowNumber, "fleetCode", "Fleet code is required", "Fleet Code", csvLine));
+        if (fleetName.isBlank()) errors.add(ImportError.withColumn(rowNumber, "fleetName", "Fleet name is required", "Fleet Name", csvLine));
 
         if (!vehicleCountText.isBlank()) {
             try {
                 int vehicleCount = Integer.parseInt(vehicleCountText);
                 if (vehicleCount < 0) {
-                    errors.add(new ImportError(rowNumber, "vehicleCount", "Vehicle count must be positive"));
+                    errors.add(ImportError.withColumn(rowNumber, "vehicleCount", 
+                        String.format("Vehicle count '%s' must be positive", vehicleCountText), "Vehicle Count", csvLine));
                 }
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "vehicleCount", "Vehicle count must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "vehicleCount", 
+                    String.format("Vehicle count '%s' must be a valid number", vehicleCountText), "Vehicle Count", csvLine));
             }
         }
 
@@ -158,7 +179,7 @@ public class AutomotiveDataValidator {
     }
 
     /**
-     * Validates service record data fields.
+     * Validates service record data fields with enhanced error reporting.
      */
     public List<ImportError> validateServiceRecord(String[] parts, int rowNumber) {
         List<ImportError> errors = new ArrayList<>();
@@ -167,29 +188,35 @@ public class AutomotiveDataValidator {
         String serviceDateText = parts[2].trim();
         String mileageText = parts[3].trim();
         String costText = parts[5].trim();
+        
+        // Reconstruct CSV line for error context
+        String csvLine = String.join(",", parts);
 
-        if (serviceNumber.isBlank()) errors.add(new ImportError(rowNumber, "serviceNumber", "Service number is required"));
+        if (serviceNumber.isBlank()) errors.add(ImportError.withColumn(rowNumber, "serviceNumber", "Service number is required", "Service Number", csvLine));
 
-        // Service date validation (required)
+        // Service date validation (required) with specific error messages
         if (serviceDateText.isBlank()) {
-            errors.add(new ImportError(rowNumber, "serviceDate", "Service date is required"));
+            errors.add(ImportError.withColumn(rowNumber, "serviceDate", "Service date is required", "Service Date", csvLine));
         } else {
             try {
                 LocalDate.parse(serviceDateText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             } catch (Exception e) {
-                errors.add(new ImportError(rowNumber, "serviceDate", "Service date must be in yyyy-MM-dd format"));
+                errors.add(ImportError.withColumn(rowNumber, "serviceDate", 
+                    String.format("Service date '%s' must be in yyyy-MM-dd format", serviceDateText), "Service Date", csvLine));
             }
         }
 
-        // Numeric validation
+        // Numeric validation with specific error messages
         if (!mileageText.isBlank()) {
             try {
                 int mileage = Integer.parseInt(mileageText);
                 if (mileage < 0) {
-                    errors.add(new ImportError(rowNumber, "mileage", "Mileage must be positive"));
+                    errors.add(ImportError.withColumn(rowNumber, "mileage", 
+                        String.format("Mileage '%s' must be positive", mileageText), "Mileage", csvLine));
                 }
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "mileage", "Mileage must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "mileage", 
+                    String.format("Mileage '%s' must be a valid number", mileageText), "Mileage", csvLine));
             }
         }
 
@@ -197,10 +224,12 @@ public class AutomotiveDataValidator {
             try {
                 double cost = Double.parseDouble(costText);
                 if (cost < 0) {
-                    errors.add(new ImportError(rowNumber, "cost", "Cost must be positive"));
+                    errors.add(ImportError.withColumn(rowNumber, "cost", 
+                        String.format("Cost '%s' must be positive", costText), "Cost", csvLine));
                 }
             } catch (NumberFormatException e) {
-                errors.add(new ImportError(rowNumber, "cost", "Cost must be a valid number"));
+                errors.add(ImportError.withColumn(rowNumber, "cost", 
+                    String.format("Cost '%s' must be a valid number", costText), "Cost", csvLine));
             }
         }
 
