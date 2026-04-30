@@ -66,11 +66,15 @@ The platform implements a complete Extract-Transform-Load pipeline for automotiv
 
 ### Extract → CSV Upload
 
+The extraction stage reads and parses CSV files from user uploads, converting raw data into structured format for processing.
+
 - Multi-format CSV ingestion with schema validation
 - Support for vehicles, dealers, warranties, fleets, and service records
 - File parsing with error recovery and detailed reporting
 
 ### Validate → Row-level Checks
+
+The validation stage ensures data quality by applying business rules, constraints, and format checks to each record before processing.
 
 - **Field-level validation** with business rules and constraints
 - **Data type validation** and format checking for data quality
@@ -82,6 +86,8 @@ The platform implements a complete Extract-Transform-Load pipeline for automotiv
 
 ### Transform → Normalization & Derived Fields
 
+The transformation stage normalizes data formats, calculates derived fields, and applies business logic to prepare data for storage.
+
 - Field normalization (case, whitespace, format standardization)
 - Derived field calculations (vehicle age, warranty duration)
 - Status mapping and enum normalization
@@ -90,12 +96,16 @@ The platform implements a complete Extract-Transform-Load pipeline for automotiv
 
 ### Load → PostgreSQL
 
+The load stage persists validated and transformed data into PostgreSQL with transaction safety and data integrity constraints.
+
 - Batch loading with transaction safety
 - Proper indexing and constraint enforcement
 - Data integrity checks
 - Audit trail and metadata storage
 
 ### Serve → API + Redis
+
+The serve stage provides high-performance data access through RESTful APIs backed by Redis caching for optimal response times.
 
 - RESTful API for data access and management
 - Redis caching for high-performance queries

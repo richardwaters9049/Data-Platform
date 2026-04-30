@@ -299,25 +299,40 @@ async function uploadFile() {
             <div
               class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
             >
-              <span class="text-sm font-medium text-[#536270]"
-                >PostgreSQL persistence</span
-              >
+              <div class="flex flex-col">
+                <span class="text-sm font-medium text-[#536270]"
+                  >PostgreSQL persistence</span
+                >
+                <span class="text-xs text-[#7b8791]"
+                  >Durable database storage for validated records</span
+                >
+              </div>
               <CheckCircle2 class="h-5 w-5 text-[#276738]" />
             </div>
             <div
               class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
             >
-              <span class="text-sm font-medium text-[#536270]"
-                >Row validation</span
-              >
+              <div class="flex flex-col">
+                <span class="text-sm font-medium text-[#536270]"
+                  >Row validation</span
+                >
+                <span class="text-xs text-[#7b8791]"
+                  >Business rules and data quality checks</span
+                >
+              </div>
               <CheckCircle2 class="h-5 w-5 text-[#276738]" />
             </div>
             <div
               class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
             >
-              <span class="text-sm font-medium text-[#536270]"
-                >Redis summary cache</span
-              >
+              <div class="flex flex-col">
+                <span class="text-sm font-medium text-[#536270]"
+                  >Redis summary cache</span
+                >
+                <span class="text-xs text-[#7b8791]"
+                  >High-performance caching for statistics</span
+                >
+              </div>
               <AlertTriangle class="h-5 w-5 text-[#9b650c]" />
             </div>
           </div>

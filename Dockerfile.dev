@@ -1,0 +1,18 @@
+FROM maven:3.9.9-eclipse-temurin-17
+
+WORKDIR /app
+
+# Copy Maven files first for better caching
+COPY pom.xml .
+
+# Install dependencies (this will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Expose ports for application and DevTools LiveReload
+EXPOSE 8080 35729
+
+# Run Spring Boot in development mode with DevTools enabled
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]

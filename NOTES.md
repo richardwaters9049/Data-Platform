@@ -245,6 +245,64 @@ Implemented comprehensive validation error reporting with exact CSV location det
 
 ---
 
+### **17:02** - Hot Reloading Configuration Added to Docker Setup
+
+Implemented hot reloading for both backend and frontend to eliminate the need for manual container restarts during development.
+
+**Development Dockerfiles Created:**
+
+- `Dockerfile.dev` - Backend development Dockerfile using Maven with Spring Boot DevTools
+- `frontend/Dockerfile.dev` - Frontend development Dockerfile using Vite with HMR enabled
+
+**Backend Hot Reloading Features:**
+
+- Spring Boot DevTools enabled for automatic application restart
+- LiveReload on port 35729 for automatic browser refresh
+- Java debugging on port 5005 for IDE integration
+- Source code mounted as volume for instant code updates
+- Maven `spring-boot:run` command for development mode
+
+**Frontend Hot Reloading Features:**
+
+- Vite HMR (Hot Module Replacement) for instant frontend updates
+- WebSocket on port 24678 for live frontend reloading
+- Source code mounted as volume for instant code updates
+- Vite dev server running with `--host 0.0.0.0` for Docker networking
+
+**Docker Compose Updates:**
+
+- Updated to use development Dockerfiles by default
+- Added volume mounts for source code hot reloading
+- Added environment variables for Spring Boot DevTools
+- Exposed additional ports for LiveReload and HMR
+- Configured proper dependency management for development workflow
+
+**Benefits:**
+
+- Instant code updates without container restarts
+- Faster development cycle with automatic reloading
+- Better developer experience with live feedback
+- Maintains separation between development and production builds
+- Enables IDE debugging capabilities
+
+**Usage:**
+
+```bash
+# Start with hot reloading enabled
+docker compose up --build
+
+# Source code changes now reload automatically
+# No need to restart containers
+```
+
+**Files Updated:**
+
+- `docker-compose.yml` - Development configuration with hot reloading
+- `Dockerfile.dev` - Backend development Dockerfile
+- `frontend/Dockerfile.dev` - Frontend development Dockerfile
+
+---
+
 ## **Next Planned Step**
 
 Refactor backend import schema for automotive data (vehicle, dealer, warranty, fleet, service records). Add Redis-backed summary/query behavior and expose endpoints for listing imported records and statistics.

@@ -3,6 +3,7 @@ services:
   backend:
     build:
       context: .
+      dockerfile: Dockerfile.dev
     container_name: data-platform-backend
     environment:
       DATABASE_URL: jdbc:postgresql://postgres:5432/dataplatform
@@ -12,8 +13,16 @@ services:
       REDIS_PORT: 6379
       JPA_SHOW_SQL: "true"
       HIBERNATE_FORMAT_SQL: "true"
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
+      SPRING_DEVTOOLS_REMOTE_SECRET: "dev-secret"
     ports:
       - "8081:8080"
+      - "35729:35729" # Spring Boot DevTools LiveReload port
+      - "5005:5005" # Java debugging port
+    volumes:
+      - ./src:/app/src:ro # Mount source code for hot reloading
+      - ./pom.xml:/app/pom.xml
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,11 +33,17 @@ services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: data-platform-frontend
     environment:
       VITE_API_PROXY_TARGET: http://backend:8080
     ports:
       - "5173:5173"
+      - "24678:24678" # Vite HMR WebSocket port
+    volumes:
+      - ./frontend/src:/app/src # Mount source code for hot reloading
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/bun.lock:/app/bun.lock
     depends_on:
       - backend
 
