@@ -141,6 +141,53 @@ Fixed null type safety warnings across RecordsController and StatisticsService t
 
 ---
 
+### **15:21** - ETL Pipeline Architecture Refactoring Completed
+
+Refactored Spring Boot service layer to implement clear ETL pipeline architecture with explicit separation of concerns and interview-ready structure.
+
+**New Package Structure:**
+
+```
+service/
+ingestion/CsvIngestionService.java          # CSV file reading & raw data extraction
+validation/AutomotiveDataValidator.java      # Business rules & data validation
+transformation/AutomotiveDataTransformer.java # Data normalization & derived fields
+pipeline/AutomotivePipelineService.java      # ETL orchestrator
+```
+
+**Key Improvements:**
+
+- **Clear Pipeline Stages**: ingestion -> validation -> transformation -> persistence -> cache invalidation
+- **Separation of Concerns**: Each service has single responsibility
+- **Method Naming**: `runPipeline()`, `validateVehicle()`, `transformVehicle()` for clarity
+- **Validation vs Transformation**: Explicit separation - validation checks data, transformation modifies valid data only
+- **Backward Compatibility**: Legacy `AutomotiveImportService` (deprecated) delegates to new pipeline
+- **API Endpoints Unchanged**: `/api/automotive/upload/{dataType}` works identically
+
+**Pipeline Flow:**
+
+1. **INGESTION**: `CsvIngestionService.ingestCsv()` - Read CSV files and extract raw data
+2. **VALIDATION**: `AutomotiveDataValidator.validate*()` - Apply business rules and constraints
+3. **TRANSFORMATION**: `AutomotiveDataTransformer.transform*()` - Normalize data and calculate derived fields
+4. **PERSISTENCE**: Repository operations - Store to PostgreSQL with relationship handling
+5. **CACHE INVALIDATION**: Clear Redis statistics cache for fresh data
+
+**Benefits:**
+
+- **Interview-Ready Architecture**: Clear ETL pattern demonstration
+- **Maintainability**: Each component has single, clear responsibility
+- **Testability**: Individual pipeline stages can be tested in isolation
+- **Scalability**: Pipeline can be extended with new stages or data types
+- **Production Features**: Cache invalidation, error handling, partial success processing
+
+**Verification:**
+
+- **Build**: `./mvnw clean compile` - SUCCESS (32 source files)
+- **API Compatibility**: All endpoints unchanged
+- **Functionality**: Same behavior with improved structure
+
+---
+
 ## **Next Planned Step**
 
 Refactor backend import schema for automotive data (vehicle, dealer, warranty, fleet, service records). Add Redis-backed summary/query behavior and expose endpoints for listing imported records and statistics.
