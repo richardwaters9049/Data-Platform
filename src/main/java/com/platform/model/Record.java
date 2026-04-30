@@ -1,0 +1,22 @@
+package com.platform.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Record {
+
+    // Current persisted import row. This will evolve towards automotive-specific fields.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String email;
+
+    private Integer age;
+}
