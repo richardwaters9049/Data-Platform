@@ -44,6 +44,14 @@ The project now has a professional README that explains the automotive data plat
 
 Validation was run again with `./mvnw test`, `bun run build`, and `docker compose config`; all passed.
 
+02:25 - Full platform Docker command added.
+
+Added a root `Dockerfile` for the Spring Boot backend and a `.dockerignore` file so Docker builds stay focused on source files rather than local build artefacts. Docker Compose now includes a `backend` service alongside `frontend`, `postgres`, and `redis`, so a fresh clone can run the whole stack with `docker compose up --build`.
+
+The backend container connects to PostgreSQL using the Compose service name `postgres`, while the frontend container proxies API calls to `http://backend:8080`. The backend is exposed on host port `8081`, and the frontend is exposed on host port `5173`.
+
+Validation was run with `docker compose config`, `./mvnw test`, `bun run build`, and `docker compose build`; all passed. The full stack was not started because local development processes were already using ports `8081` and `5173`.
+
 Next planned step:
 
 Refactor the backend import schema towards automotive data such as vehicle, dealer, warranty, fleet, or service records. Then add Redis-backed summary/query behaviour and expose a simple endpoint to list imported records or return import statistics.

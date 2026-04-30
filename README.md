@@ -134,7 +134,7 @@ flowchart LR
 ```mermaid
 flowchart TB
     frontend["Vue Frontend\nlocalhost:5173"]
-    app["Spring Boot Application\nlocalhost:8081"]
+    app["Spring Boot API\ncontainer:8080\nhost:8081"]
     postgres[("PostgreSQL 17\nlocalhost:55432")]
     redis[("Redis 7\nlocalhost:56379")]
     volume1["postgres-data volume"]
@@ -190,6 +190,8 @@ sequenceDiagram
 
 ```text
 .
+├── Dockerfile
+├── .dockerignore
 ├── docker-compose.yml
 ├── frontend
 │   ├── Dockerfile
@@ -214,23 +216,39 @@ sequenceDiagram
 
 ### Prerequisites
 
-- Java 17
-- Bun
 - Docker Desktop or Docker Engine
-- Maven Wrapper, included in the repository
 
-### Start Local Infrastructure
+### Run the Full Platform
+
+From a fresh clone, start everything with one command:
 
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-This starts PostgreSQL, Redis, and the Vue frontend container.
+This builds and starts:
+
+- Spring Boot backend
+- Vue frontend
+- PostgreSQL
+- Redis
 
 Check the services:
 
 ```bash
 docker compose ps
+```
+
+The application is available at:
+
+```text
+http://localhost:5173
+```
+
+The backend API is available at:
+
+```text
+http://localhost:8081
 ```
 
 PostgreSQL is available on:
@@ -245,15 +263,15 @@ Redis is available on:
 localhost:56379
 ```
 
-The frontend is available on:
+### Local Development Alternative
 
-```text
-http://localhost:5173
+If you want to run the backend directly from your terminal, start only the supporting services:
+
+```bash
+docker compose up -d postgres redis
 ```
 
-### Run the Application
-
-The backend currently runs from the local terminal:
+Then run the backend:
 
 ```bash
 ./mvnw spring-boot:run
@@ -265,15 +283,7 @@ If port `8080` is already in use, run it on another port:
 ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
 ```
 
-### Run the Frontend
-
-The frontend can run through Docker Compose:
-
-```bash
-docker compose up -d frontend
-```
-
-Or directly from the local terminal:
+The frontend can also run directly from the local terminal:
 
 ```bash
 cd frontend
@@ -287,7 +297,7 @@ The frontend runs on:
 http://localhost:5173
 ```
 
-The Vite dev server proxies `/api` and `/health` requests to the backend on `localhost:8081`. In Docker Compose this is controlled with `VITE_API_PROXY_TARGET`.
+The Vite dev server proxies `/api` and `/health` requests to the backend. In Docker Compose this target is `http://backend:8080`; in local development it defaults to `http://localhost:8081`.
 
 ### Health Check
 

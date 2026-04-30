@@ -1,20 +1,36 @@
 services:
-  # Vue frontend served by Vite; proxies API calls to the backend running locally.
-  frontend:
+  # Spring Boot API container. It talks to Postgres and Redis over the Compose network.
+  backend:
     build:
-      context: ./frontend
-    container_name: data-platform-frontend
+      context: .
+    container_name: data-platform-backend
     environment:
-      VITE_API_PROXY_TARGET: http://host.docker.internal:8081
+      DATABASE_URL: jdbc:postgresql://postgres:5432/dataplatform
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JPA_SHOW_SQL: "true"
+      HIBERNATE_FORMAT_SQL: "true"
     ports:
-      - "5173:5173"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "8081:8080"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # Vue frontend served by Vite; proxies API calls to the backend service.
+  frontend:
+    build:
+      context: ./frontend
+    container_name: data-platform-frontend
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
 
   # Durable relational store for accepted import records.
   postgres:
