@@ -12,18 +12,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: apiProxyTarget,
-        changeOrigin: true,
-        configure: (proxy, options) => {
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            const body = [];
-            proxyRes.on('data', (chunk) => body.push(chunk));
-            proxyRes.on('end', () => {
-              res.removeHeader('transfer-encoding');
-              res.removeHeader('Content-Length');
-              res.end(Buffer.concat(body));
-            });
-          });
-        }
+        changeOrigin: true
       },
       "/health": {
         target: apiProxyTarget,

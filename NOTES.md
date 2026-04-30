@@ -1,65 +1,89 @@
 # Project Notes
 
-Date: 30/04/2026
+## **30/04/2026**
 
-01:29 - Backend ETL refactor completed.
+---
 
-The CSV upload flow was moved out of the controller and into a cleaner service-based structure. `UploadController` now delegates to `RecordImportService`, while `CsvRecordParser` handles row parsing and validation. Upload responses now return structured counts for rows read, imported, and rejected, plus row-level validation errors.
+### **01:29 - Backend ETL refactor completed**
 
-Tests were added for valid and invalid CSV imports. `./mvnw test` passed with 3 tests and 0 failures.
+Moved CSV upload flow from controller to service-based architecture. `UploadController` delegates to `RecordImportService`, while `CsvRecordParser` handles parsing and validation. Responses now include row counts and validation errors.
 
-01:36 - GitHub repository created.
+`./mvnw test` passed with 3 tests, 0 failures.
 
-The project was initialized as a Git repository on `main`, committed, and pushed to GitHub at `richardwaters9049/data-platform`.
+---
 
-01:39 - Local-only folders removed from Git tracking.
+### **01:36 - GitHub repository created**
 
-`Interview-info/` was removed from the GitHub repository but kept locally. `Interview-info/` and `YouTube/` are now ignored by Git so local planning notes stay on this machine only.
+Initialized Git repository on `main` and pushed to `richardwaters9049/data-platform`.
 
-01:50 - Project testing completed from the terminal.
+---
 
-The app was run on port `8081` because another Java process was already using `8080`. Health check and CSV upload were tested with terminal commands. Valid CSV rows inserted into PostgreSQL successfully. Invalid CSV rows returned `400 Bad Request` with validation errors for missing name, invalid email, and invalid age.
+### **01:39 - Local-only folders removed from Git tracking**
 
-01:55 - Docker Compose file created.
+Removed `Interview-info/` from GitHub, kept locally. Added `Interview-info/` and `YouTube/` to `.gitignore`.
 
-Added `docker-compose.yml` to define the local infrastructure for the project. It starts PostgreSQL 17 on `localhost:55432` with a `dataplatform` database, plus Redis 7 Alpine on `localhost:56379`. Both services have named Docker volumes so data can persist between restarts, and both include health checks so their readiness can be inspected with Docker.
+---
 
-Spring configuration was updated so server port, database settings, Redis settings, and JPA logging/schema behavior can be overridden with environment variables. This keeps the local setup simple while making the app easier to adapt later for Docker, CI, and Azure.
+### **01:50 - Project testing completed from terminal**
+
+Ran app on port `8081` (port `8080` was occupied). Tested health check and CSV upload via terminal. Valid rows inserted to PostgreSQL, invalid rows returned `400 Bad Request` with validation errors.
+
+---
+
+### **01:55 - Docker Compose file created**
+
+Added `docker-compose.yml` to define local infrastructure. It starts PostgreSQL 17 on `localhost:55432` with a `dataplatform` database, plus Redis 7 Alpine on `localhost:56379`. Both services have named Docker volumes for data persistence and health checks.
+
+Spring configuration updated to override server port, database settings, Redis settings, and JPA logging/schema behavior with environment variables.
 
 `docker compose config` passed, and `./mvnw test` passed with 3 tests and 0 failures.
 
-02:07 - Vue frontend scaffold created.
+---
 
-Added a `frontend/` application using Vue, Vite, Bun, Tailwind CSS, and Lucide icons. The first screen is an automotive data ingestion console with API health checking, CSV upload, import summary cards, validation error display, and pipeline status indicators. The frontend uses a Vite proxy so `/api` and `/health` requests can reach the Spring Boot backend running on `localhost:8081`.
+### **02:07 - Vue frontend scaffold created**
 
-Dependencies were installed with Bun, and `bun run build` completed successfully.
+Added `frontend/` with Vue, Vite, Bun, Tailwind CSS, and Lucide icons. Built automotive data ingestion console with API health checking, CSV upload, import summaries, and validation display. Frontend uses Vite proxy to reach backend on `localhost:8081`.
 
-02:14 - Frontend added to Docker Compose.
+Dependencies installed with Bun, `bun run build` successful.
 
-Added `frontend/Dockerfile` using the `oven/bun:1.3.1-alpine` image. Docker Compose now includes a `frontend` service that builds the Vue application container and exposes it on `localhost:5173`. The frontend proxy target is configurable with `VITE_API_PROXY_TARGET`, and the Compose service points it at `host.docker.internal:8081` so it can reach the Spring Boot backend running from the local terminal.
+---
 
-02:22 - Frontend, documentation, sample data, and comments prepared for commit.
+### **02:14 - Frontend added to Docker Compose**
 
-The project now has a professional README that explains the automotive data platform, architecture, tech stack, expected API output, local setup, and roadmap. A dummy CSV file was added at `samples/automotive-contacts.csv` for terminal and frontend upload testing. Light comments were added across the backend, frontend, and Docker Compose files to make the code easier to navigate without over-documenting obvious lines.
+Added `frontend/Dockerfile` using `oven/bun:1.3.1-alpine`. Compose includes `frontend` service on `localhost:5173`. Proxy target configurable via `VITE_API_PROXY_TARGET`, pointing to `host.docker.internal:8081`.
 
-Validation was run again with `./mvnw test`, `bun run build`, and `docker compose config`; all passed.
+---
 
-02:25 - Full platform Docker command added.
+### **02:22 - Frontend, documentation, sample data, and comments prepared**
 
-Added a root `Dockerfile` for the Spring Boot backend and a `.dockerignore` file so Docker builds stay focused on source files rather than local build artefacts. Docker Compose now includes a `backend` service alongside `frontend`, `postgres`, and `redis`, so a fresh clone can run the whole stack with `docker compose up --build`.
+Added professional README with architecture, tech stack, API docs, and setup guide. Added `samples/automotive-contacts.csv` for testing. Added light comments across codebase for navigation.
 
-The backend container connects to PostgreSQL using the Compose service name `postgres`, while the frontend container proxies API calls to `http://backend:8080`. The backend is exposed on host port `8081`, and the frontend is exposed on host port `5173`.
+Validation: `./mvnw test`, `bun run build`, `docker compose config` - all passed.
 
-Validation was run with `docker compose config`, `./mvnw test`, `bun run build`, and `docker compose build`; all passed. The full stack was not started because local development processes were already using ports `8081` and `5173`.
+---
 
-03:16 - Upload CSV button functionality fixed.
+### **02:25 - Full platform Docker command added**
 
-The upload functionality was already implemented in the frontend but wasn't working due to a Vite proxy chunked transfer encoding issue with multipart/form-data requests. Fixed by configuring the frontend to call the backend directly at `http://localhost:8081/api/upload` instead of using the proxy. The upload now successfully processes CSV files and returns validation results.
+Added root `Dockerfile` for Spring Boot backend and `.dockerignore`. Compose now includes `backend` service with `frontend`, `postgres`, and `redis`. Full stack runs with `docker compose up --build`.
 
-03:38 - CORS configuration added for frontend-backend communication.
+Backend connects to PostgreSQL via Compose service name. Frontend proxies to `http://backend:8080`. Exposed ports: backend `8081`, frontend `5173`.
 
-Fixed "API not reachable" error when uploading CSV files from the frontend. The issue was missing CORS (Cross-Origin Resource Sharing) configuration in the Spring Boot backend. Added `WebConfig.java` with CORS mapping for `/api/** endpoints to allow requests from `http://localhost:5173`. The backend container was rebuilt and restarted, and CORS headers are now properly included in API responses. CSV upload functionality now works end-to-end through the frontend interface.
+Validation: `docker compose config`, `./mvnw test`, `bun run build`, `docker compose build` - all passed.
 
-Next planned step:
+---
 
-Refactor the backend import schema towards automotive data such as vehicle, dealer, warranty, fleet, or service records. Then add Redis-backed summary/query behaviour and expose a simple endpoint to list imported records or return import statistics.
+### **03:16 - Upload CSV button functionality fixed**
+
+Fixed Vite proxy chunked transfer encoding issue with multipart/form-data. Configured frontend to call backend directly at `http://localhost:8081/api/upload`. CSV upload now processes successfully.
+
+---
+
+### **03:38 - CORS configuration added for frontend-backend communication**
+
+Fixed "API not reachable" error by adding CORS configuration. Created `WebConfig.java` with CORS mapping for `/api/**` endpoints from `http://localhost:5173`. Backend rebuilt with CORS headers. CSV upload now works end-to-end.
+
+---
+
+## **Next Planned Step**
+
+Refactor backend import schema for automotive data (vehicle, dealer, warranty, fleet, service records). Add Redis-backed summary/query behavior and expose endpoints for listing imported records and statistics.

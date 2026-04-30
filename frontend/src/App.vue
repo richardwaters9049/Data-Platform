@@ -16,6 +16,7 @@ import {
 const selectedFile = ref(null);
 const result = ref(null);
 const errorMessage = ref("");
+const successMessage = ref("");
 const isUploading = ref(false);
 const healthStatus = ref("Not checked");
 
@@ -47,6 +48,7 @@ function handleFileChange(event) {
   selectedFile.value = event.target.files?.[0] ?? null;
   result.value = null;
   errorMessage.value = "";
+  successMessage.value = "";
 }
 
 // Quick connectivity check for operators before attempting an upload.
@@ -72,12 +74,14 @@ async function uploadFile() {
   isUploading.value = true;
   result.value = null;
   errorMessage.value = "";
+  successMessage.value = "";
 
   const formData = new FormData();
   formData.append("file", selectedFile.value);
+  const fileName = selectedFile.value.name;
 
   try {
-    // Call backend directly to bypass proxy chunk encoding issues
+    // Browser can reach backend at localhost:8081 when frontend is at localhost:5173
     const response = await fetch("http://localhost:8081/api/upload", {
       method: "POST",
       body: formData,
@@ -88,6 +92,10 @@ async function uploadFile() {
 
     if (!response.ok && !payload.errors?.length) {
       errorMessage.value = "The import could not be completed.";
+    } else if (response.ok || payload.errors?.length > 0) {
+      // Show success message and clear file selection for new upload
+      successMessage.value = `Successfully uploaded "${fileName}". ${payload.rowsImported} rows imported, ${payload.rowsRejected} rows rejected.`;
+      selectedFile.value = null;
     }
   } catch {
     errorMessage.value =
@@ -268,6 +276,14 @@ async function uploadFile() {
           >
             <XCircle class="mt-0.5 h-4 w-4 shrink-0" />
             <span>{{ errorMessage }}</span>
+          </div>
+
+          <div
+            v-if="successMessage"
+            class="mt-4 flex gap-2 rounded-md bg-[#eff8f2] p-3 text-sm text-[#276738]"
+          >
+            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{{ successMessage }}</span>
           </div>
         </div>
 
