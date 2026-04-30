@@ -11,6 +11,7 @@ import java.util.Optional;
 @Component
 public class CsvRecordParser {
 
+    // Parses the current CSV schema: name,email,age.
     public ParsedRecord parse(String line, int rowNumber) {
         String[] parts = line.split(",", -1);
         List<ImportError> errors = new ArrayList<>();
@@ -24,6 +25,7 @@ public class CsvRecordParser {
         String email = parts[1].trim();
         String ageText = parts[2].trim();
 
+        // Collect all row-level validation issues so users can fix a file in one pass.
         if (name.isBlank()) {
             errors.add(new ImportError(rowNumber, "name", "Name is required"));
         }
@@ -59,6 +61,7 @@ public class CsvRecordParser {
         return ParsedRecord.valid(record);
     }
 
+    // Holds either a valid domain record or the validation issues for one rejected row.
     public record ParsedRecord(Optional<Record> record, List<ImportError> errors) {
 
         private static ParsedRecord valid(Record record) {
@@ -74,4 +77,3 @@ public class CsvRecordParser {
         }
     }
 }
-

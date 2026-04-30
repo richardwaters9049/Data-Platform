@@ -22,6 +22,7 @@ public class UploadController {
     public ResponseEntity<ImportResult> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
         ImportResult result = importService.importCsv(file);
 
+        // Validation errors are returned as a client-facing import report.
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result);
         }

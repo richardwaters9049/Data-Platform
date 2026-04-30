@@ -30,6 +30,7 @@ public class RecordImportService {
         List<Record> recordsToSave = new ArrayList<>();
         int rowsRead = 0;
 
+        // The first row is treated as a header; row numbers match the source file.
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
@@ -49,6 +50,7 @@ public class RecordImportService {
                 rowsRead++;
                 CsvRecordParser.ParsedRecord parsedRecord = parser.parse(line, rowNumber);
 
+                // Keep accepted records and rejected-row errors separate for the final summary.
                 if (parsedRecord.isValid()) {
                     recordsToSave.add(parsedRecord.record().orElseThrow());
                 } else {
@@ -57,6 +59,7 @@ public class RecordImportService {
             }
         }
 
+        // Persist only the rows that passed validation.
         repository.saveAll(recordsToSave);
 
         return new ImportResult(
@@ -67,4 +70,3 @@ public class RecordImportService {
         );
     }
 }
-

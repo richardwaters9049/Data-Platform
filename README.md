@@ -1,8 +1,8 @@
-# Data Platform
+# Automotive Data Platform
 
-A Java-based data ingestion service for uploading, validating, and storing structured CSV records.
+A full-stack data ingestion platform for uploading, validating, and storing structured automotive data.
 
-The project provides a clean backend foundation for a small data platform: files are accepted through a REST API, parsed row by row, validated, and persisted to PostgreSQL. Local infrastructure is managed with Docker Compose, with Redis provisioned for fast summary/query features as the platform grows.
+The project provides a clean foundation for vehicle, dealer, warranty, fleet, service, and customer data workflows. Files are accepted through a REST API, parsed row by row, validated, and persisted to PostgreSQL. A Vue frontend provides an operator-friendly upload console, while Docker Compose manages the local infrastructure.
 
 ## Table of Contents
 
@@ -21,10 +21,11 @@ The project provides a clean backend foundation for a small data platform: files
 
 ## Overview
 
-Data Platform is a Spring Boot application designed to demonstrate a reliable data ingestion flow. It currently focuses on CSV upload, row-level validation, structured API responses, and durable storage in PostgreSQL.
+Automotive Data Platform is a Spring Boot and Vue application designed around reliable data ingestion for automotive operations. It currently focuses on CSV upload, row-level validation, structured API responses, and durable storage in PostgreSQL.
 
 The application is intentionally small, but built around production-friendly boundaries:
 
+- the Vue frontend presents a clear ingestion console
 - controllers handle HTTP concerns
 - services orchestrate import workflows
 - parser components validate incoming data
@@ -33,7 +34,7 @@ The application is intentionally small, but built around production-friendly bou
 
 ## Aim
 
-The aim of the project is to provide a clear, maintainable foundation for data movement and validation.
+The aim of the project is to provide a clear, maintainable foundation for automotive data movement and validation.
 
 At this stage, the platform is focused on one core workflow:
 
@@ -43,16 +44,17 @@ At this stage, the platform is focused on one core workflow:
 4. store accepted rows
 5. return a clear import summary and validation report
 
-This makes the system useful as a base for broader data integration features such as import history, transformation rules, cached summaries, dashboards, and cloud deployment.
+This makes the system useful as a base for broader automotive data integration features such as import history, transformation rules, cached summaries, dashboards, dealer feeds, vehicle record imports, and cloud deployment.
 
 ## What the Application Does
 
-The current application exposes a REST API that accepts CSV files with the following columns:
+The current backend accepts CSV files with the following columns:
 
 ```csv
 name,email,age
-Jane Doe,jane@example.com,32
-Sam Jones,sam@example.com,41
+Dealer Contact,dealer.ops@example.com,42
+Warranty Analyst,warranty@example.com,36
+Fleet Coordinator,fleet@example.com,29
 ```
 
 For each uploaded row, the application validates:
@@ -62,6 +64,8 @@ For each uploaded row, the application validates:
 - `age` is present, numeric, and between `0` and `130`
 
 Valid rows are saved to PostgreSQL. Invalid rows are rejected and returned to the caller with row numbers, field names, and readable error messages.
+
+The frontend frames this workflow as an automotive ingestion console. The next backend iteration will move the import schema towards domain-specific fields such as VIN, registration, dealer code, warranty status, service date, and odometer reading.
 
 ## Expected Output
 
@@ -109,7 +113,7 @@ An upload containing invalid rows returns `400 Bad Request` with row-level valid
 
 ```mermaid
 flowchart LR
-    client["Client or API Consumer"]
+    client["Vue Ingestion Console"]
     api["Spring Boot REST API"]
     controller["Upload Controller"]
     service["Record Import Service"]
@@ -129,12 +133,14 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    app["Spring Boot Application"]
+    frontend["Vue Frontend\nlocalhost:5173"]
+    app["Spring Boot Application\nlocalhost:8081"]
     postgres[("PostgreSQL 17\nlocalhost:55432")]
     redis[("Redis 7\nlocalhost:56379")]
     volume1["postgres-data volume"]
     volume2["redis-data volume"]
 
+    frontend --> app
     app --> postgres
     app -. "planned cache/query features" .-> redis
     postgres --> volume1
@@ -146,24 +152,30 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     participant User
+    participant UI as Vue Console
     participant API as Upload API
     participant Service as Import Service
     participant Parser as CSV Parser
     participant DB as PostgreSQL
 
-    User->>API: POST /api/upload
+    User->>UI: Select CSV and upload
+    UI->>API: POST /api/upload
     API->>Service: importCsv(file)
     Service->>Parser: parse and validate each row
     Parser-->>Service: valid records and validation errors
     Service->>DB: save accepted records
     Service-->>API: ImportResult
-    API-->>User: 200 OK or 400 Bad Request
+    API-->>UI: 200 OK or 400 Bad Request
+    UI-->>User: Import summary and validation report
 ```
 
 ## Tech Stack
 
 | Area | Technology |
 | --- | --- |
+| Frontend | Vue 3, Vite |
+| Styling | Tailwind CSS |
+| Frontend package manager | Bun |
 | Language | Java 17 |
 | Framework | Spring Boot 3.5 |
 | API | Spring Web |
@@ -179,6 +191,11 @@ sequenceDiagram
 ```text
 .
 ├── docker-compose.yml
+├── frontend
+│   ├── Dockerfile
+│   ├── src
+│   ├── package.json
+│   └── vite.config.js
 ├── pom.xml
 ├── src
 │   ├── main
@@ -198,6 +215,7 @@ sequenceDiagram
 ### Prerequisites
 
 - Java 17
+- Bun
 - Docker Desktop or Docker Engine
 - Maven Wrapper, included in the repository
 
@@ -206,6 +224,8 @@ sequenceDiagram
 ```bash
 docker compose up -d
 ```
+
+This starts PostgreSQL, Redis, and the Vue frontend container.
 
 Check the services:
 
@@ -225,7 +245,15 @@ Redis is available on:
 localhost:56379
 ```
 
+The frontend is available on:
+
+```text
+http://localhost:5173
+```
+
 ### Run the Application
+
+The backend currently runs from the local terminal:
 
 ```bash
 ./mvnw spring-boot:run
@@ -236,6 +264,30 @@ If port `8080` is already in use, run it on another port:
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
 ```
+
+### Run the Frontend
+
+The frontend can run through Docker Compose:
+
+```bash
+docker compose up -d frontend
+```
+
+Or directly from the local terminal:
+
+```bash
+cd frontend
+bun install
+bun run dev
+```
+
+The frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+The Vite dev server proxies `/api` and `/health` requests to the backend on `localhost:8081`. In Docker Compose this is controlled with `VITE_API_PROXY_TARGET`.
 
 ### Health Check
 
@@ -274,7 +326,7 @@ Form field:
 Example:
 
 ```bash
-printf "name,email,age\nJane Doe,jane@example.com,32\nSam Jones,sam@example.com,41\n" > /tmp/records-valid.csv
+printf "name,email,age\nDealer Contact,dealer.ops@example.com,42\nWarranty Analyst,warranty@example.com,36\n" > /tmp/records-valid.csv
 
 /usr/bin/curl -sS -i \
   -F "file=@/tmp/records-valid.csv" \
@@ -321,15 +373,22 @@ The current tests cover:
 - successful CSV import
 - invalid CSV validation output
 
+Build the frontend:
+
+```bash
+cd frontend
+bun run build
+```
+
 ## Roadmap
 
 Planned improvements:
 
+- automotive import schema for vehicle, dealer, warranty, fleet, or service records
 - Redis-backed import summary/query endpoint
-- endpoint for listing imported records
+- endpoint for listing imported automotive records
 - import history tracking
 - Dockerised application runtime
 - GitHub Actions workflow
 - Vue dashboard for uploads and validation results
 - Azure deployment documentation
-

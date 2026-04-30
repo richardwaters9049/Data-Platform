@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Record {
 
+    // Current persisted import row. This will evolve towards automotive-specific fields.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

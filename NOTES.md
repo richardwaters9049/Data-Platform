@@ -14,7 +14,7 @@ The project was initialized as a Git repository on `main`, committed, and pushed
 
 01:39 - Local-only folders removed from Git tracking.
 
-`Interview-info/` was removed from the GitHub repository but kept locally. `Interview-info/` and `YouTube/` are now ignored by Git so private interview notes and parked video planning notes stay on this machine only.
+`Interview-info/` was removed from the GitHub repository but kept locally. `Interview-info/` and `YouTube/` are now ignored by Git so local planning notes stay on this machine only.
 
 01:50 - Project testing completed from the terminal.
 
@@ -28,6 +28,22 @@ Spring configuration was updated so server port, database settings, Redis settin
 
 `docker compose config` passed, and `./mvnw test` passed with 3 tests and 0 failures.
 
+02:07 - Vue frontend scaffold created.
+
+Added a `frontend/` application using Vue, Vite, Bun, Tailwind CSS, and Lucide icons. The first screen is an automotive data ingestion console with API health checking, CSV upload, import summary cards, validation error display, and pipeline status indicators. The frontend uses a Vite proxy so `/api` and `/health` requests can reach the Spring Boot backend running on `localhost:8081`.
+
+Dependencies were installed with Bun, and `bun run build` completed successfully.
+
+02:14 - Frontend added to Docker Compose.
+
+Added `frontend/Dockerfile` using the `oven/bun:1.3.1-alpine` image. Docker Compose now includes a `frontend` service that builds the Vue application container and exposes it on `localhost:5173`. The frontend proxy target is configurable with `VITE_API_PROXY_TARGET`, and the Compose service points it at `host.docker.internal:8081` so it can reach the Spring Boot backend running from the local terminal.
+
+02:22 - Frontend, documentation, sample data, and comments prepared for commit.
+
+The project now has a professional README that explains the automotive data platform, architecture, tech stack, expected API output, local setup, and roadmap. A dummy CSV file was added at `samples/automotive-contacts.csv` for terminal and frontend upload testing. Light comments were added across the backend, frontend, and Docker Compose files to make the code easier to navigate without over-documenting obvious lines.
+
+Validation was run again with `./mvnw test`, `bun run build`, and `docker compose config`; all passed.
+
 Next planned step:
 
-Add Redis-backed summary/query behavior, then expose a simple endpoint to list imported records or return import statistics.
+Refactor the backend import schema towards automotive data such as vehicle, dealer, warranty, fleet, or service records. Then add Redis-backed summary/query behaviour and expose a simple endpoint to list imported records or return import statistics.
