@@ -1,0 +1,6 @@
+vin,make,model,year,trim,color,fuelType,transmission,engineSize,bodyStyle,dealerCode,status
+1HGCM82633A004352,Honda,Civic,2022,EX,Black,Gasoline,CVT,1.5,Sedan,DEAL001,NEW
+2T3BF4DV9AR123456,Toyota,Rav4,2021,XLE,Blue,Gasoline,Automatic,2.5,SUV,DEAL002,USED
+5YJ3E1EA5JF123456,Tesla,Model 3,2023,Performance,White,Electric,Automatic,,Sedan,DEAL003,NEW
+1FTFW1ET5DFC12345,Ford,F-150,2020,XLT,Red,Gasoline,10-Speed,3.5,Truck,DEAL001,USED
+JTDKB20U993045678,Toyota,Camry,2019,LE,Silver,Gasoline,Automatic,2.5,Sedan,DEAL002,SOLD

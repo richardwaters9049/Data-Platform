@@ -1,0 +1,5 @@
+code,name,address,city,state,zipCode,phone,email,website,status
+DEAL001,Premium Motors,123 Main St,Los Angeles,CA,90210,555-0101,info@premiummotors.com,www.premiummotors.com,ACTIVE
+DEAL002,Valley Auto,456 Oak Ave,Phoenix,AZ,85001,555-0202,sales@valleyauto.com,www.valleyauto.com,ACTIVE
+DEAL003,Electric Dreams,789 Tech Blvd,San Francisco,CA,94102,555-0303,contact@electricdreams.com,www.electricdreams.com,ACTIVE
+DEAL004,Mountain Motors,321 Peak Dr,Denver,CO,80202,555-0404,info@mountainmotors.com,www.mountainmotors.com,INACTIVE
