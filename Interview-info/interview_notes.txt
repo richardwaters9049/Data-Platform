@@ -1,7 +1,0 @@
-Interview Talking Points
-
-- Built ETL-style backend service
-- Handles CSV ingestion and validation
-- Uses Dockerized PostgreSQL
-- Solved real-world issues (port conflicts, DB roles)
-- Designed with scalability in mind

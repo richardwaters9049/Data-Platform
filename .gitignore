@@ -3,6 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 .DS_Store
 **/.DS_Store
+Interview-info/
 YouTube/
 !**/src/main/**/target/
 !**/src/test/**/target/
