@@ -1,15 +1,16 @@
-# Automotive Data Platform
+# Automotive ETL Data Platform
 
-A comprehensive full-stack automotive data management platform for ingesting, validating, storing, and analyzing structured automotive industry data.
+A containerized ETL platform that ingests CSV automotive data, validates it, applies transformations, stores it in PostgreSQL, and serves it via a cached API.
 
-The platform supports multiple automotive data domains including vehicles, dealers, warranties, fleets, and service records. It provides robust CSV import with row-level validation, RESTful APIs for data management, real-time statistics with Redis caching, and a modern Vue.js frontend for data visualization and management.
+The platform implements a complete Extract-Transform-Load pipeline with robust data quality controls, real-time statistics, and production-grade reliability for automotive industry data workflows.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
-- [Supported Data Types](#supported-data-types)
+- [ETL Pipeline](#etl-pipeline)
 - [Architecture](#architecture)
+- [Production Considerations](#production-considerations)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -21,25 +22,27 @@ The platform supports multiple automotive data domains including vehicles, deale
 
 ## Overview
 
-The Automotive Data Platform is a production-ready Spring Boot and Vue.js application designed specifically for automotive industry data workflows. It provides a complete solution for:
+The Automotive ETL Data Platform is a production-grade data integration system designed specifically for automotive industry data workflows. It provides a complete Extract-Transform-Load solution for:
 
-- **Multi-domain data ingestion**: Vehicles, dealers, warranties, fleets, and service records
-- **Robust validation**: Field-level validation with detailed error reporting
-- **Real-time analytics**: Redis-powered statistics and caching
-- **Modern UI**: Vue.js frontend with Tailwind CSS styling
-- **Scalable architecture**: Containerized deployment with Docker Compose
+- **Data Ingestion**: Multi-domain CSV import with robust error handling and validation
+- **Data Transformation**: Field normalization, derived calculations, and data enrichment
+- **Data Quality**: Row-level validation with detailed error reporting and partial success handling
+- **Reliable Storage**: PostgreSQL with proper indexing and data integrity
+- **Real-time Serving**: Redis-powered caching for high-performance data access
+- **Pipeline Interface**: Vue.js frontend for monitoring and interacting with the ETL pipeline
 
-The platform is built with production-grade patterns including proper separation of concerns, comprehensive error handling, and scalable caching strategies.
+The platform is built with production-grade patterns including validation-first ingestion, cache invalidation strategies, idempotent operations, and scalable containerized deployment.
 
 ## Features
 
-### Core Functionality
+### Core Data System Functionality
 
-- **Multi-format CSV Import**: Support for different automotive data schemas
-- **Row-level Validation**: Detailed validation with specific error messages
-- **Real-time Statistics**: Cached statistics for performance
-- **Data Management APIs**: CRUD operations for all data types
-- **Health Monitoring**: Application and database health checks
+- **Multi-format CSV Ingestion**: Support for different automotive data schemas with validation
+- **Row-level Validation**: Detailed validation with specific error messages and partial success handling
+- **Data Transformation**: Field normalization and derived field calculations
+- **Real-time Statistics**: Cached statistics for high-performance data access
+- **Data Management APIs**: CRUD operations for all data types with proper error handling
+- **Health Monitoring**: Application and database health checks for system reliability
 
 ### Data Domains Supported
 
@@ -49,15 +52,76 @@ The platform is built with production-grade patterns including proper separation
 - **Fleets**: Fleet management with status and location tracking
 - **Service Records**: Maintenance history with status and type classification
 
-### Technical Features
+### Data System Features
 
-- **Redis Caching**: 5-minute cache for statistics and query results
-- **PostgreSQL Storage**: Durable relational database with proper indexing
-- **Docker Deployment**: Complete containerized infrastructure
+- **Redis Caching**: 5-minute cache for statistics and query results with automatic invalidation
+- **PostgreSQL Storage**: Durable relational database with proper indexing and data integrity
+- **Docker Deployment**: Complete containerized infrastructure for scalable deployment
 - **API Documentation**: RESTful endpoints with proper HTTP semantics
-- **Error Handling**: Comprehensive validation and error reporting
+- **Error Handling**: Comprehensive validation and error reporting for data quality assurance
 
-## Supported Data Types
+## ETL Pipeline
+
+The platform implements a complete Extract-Transform-Load pipeline for automotive data:
+
+### Extract → CSV Upload
+
+- Multi-format CSV ingestion with schema validation
+- Support for vehicles, dealers, warranties, fleets, and service records
+- File parsing with error recovery and detailed reporting
+
+### Validate → Row-level Checks
+
+- **Field-level validation** with business rules and constraints
+- **Data type validation** and format checking for data quality
+- **Referential integrity validation** across related data domains
+- **Partial success handling** with detailed error reporting - process valid records while flagging issues
+- **Duplicate detection** and handling with configurable policies
+- **Comprehensive error reporting** with specific field-level error messages
+- **Validation statistics** showing success/failure rates for data quality monitoring
+
+### Transform → Normalization & Derived Fields
+
+- Field normalization (case, whitespace, format standardization)
+- Derived field calculations (vehicle age, warranty duration)
+- Status mapping and enum normalization
+- Geographic data standardization
+- Business logic transformations
+
+### Load → PostgreSQL
+
+- Batch loading with transaction safety
+- Proper indexing and constraint enforcement
+- Data integrity checks
+- Audit trail and metadata storage
+
+### Serve → API + Redis
+
+- RESTful API for data access and management
+- Redis caching for high-performance queries
+- Real-time statistics and analytics
+- Cache invalidation on data updates
+- Health monitoring and metrics
+
+### Pipeline Flow Diagram
+
+```mermaid
+flowchart LR
+    csv["CSV Files"]
+    validation["Data Validation"]
+    transformation["Data Transformation"]
+    database[("PostgreSQL")]
+    cache[("Redis Cache")]
+    api["REST API"]
+    frontend["Pipeline Interface"]
+
+    csv --> validation
+    validation --> transformation
+    transformation --> database
+    database --> cache
+    cache --> api
+    api --> frontend
+```
 
 ### Vehicle Data
 
@@ -163,6 +227,53 @@ sequenceDiagram
     UI-->>User: Import summary and validation report
 ```
 
+## Production Considerations
+
+The platform is designed with production-grade engineering practices:
+
+### Validation-First Ingestion
+
+- All data undergoes comprehensive validation before storage
+- Partial success handling allows processing valid records while reporting errors
+- Detailed error reporting enables data quality monitoring
+- Business rule validation ensures data integrity
+
+### Cache Invalidation Strategy
+
+- Automatic cache invalidation on data updates
+- Namespace-based cache keys for targeted invalidation
+- 5-minute TTL balances performance with data freshness
+- Manual cache clearing for maintenance scenarios
+
+### Idempotency and Data Quality
+
+- Duplicate detection during import processes
+- Transaction-safe batch loading operations
+- Proper constraint enforcement at database level
+- Audit trail for data lineage and troubleshooting
+
+### Separation of Concerns
+
+- Clear boundaries between validation, transformation, and storage
+- Service layer encapsulates business logic
+- Repository pattern for data access abstraction
+- Configuration externalization for different environments
+
+### Scalability Design
+
+- Stateless application services enable horizontal scaling
+- Containerized deployment with Docker Compose
+- Redis caching reduces database load
+- Proper indexing for query performance
+- Connection pooling for database efficiency
+
+### Monitoring and Reliability
+
+- Health check endpoints for system monitoring
+- Comprehensive error handling and logging
+- Graceful degradation on service failures
+- Database connection resilience
+
 ## Tech Stack
 
 | Area                     | Technology                                  |
@@ -239,8 +350,8 @@ This builds and starts all services:
 
 Once running, access the application at:
 
-- **Frontend Application**: http://localhost:5173
-- **Backend API**: http://localhost:8081
+- **Frontend Application**: <http://localhost:5173>
+- **Backend API**: <http://localhost:8081>
 - **Database**: localhost:55432
 - **Redis**: localhost:56379
 
@@ -439,7 +550,7 @@ The application uses JPA/Hibernate for automatic schema generation. Tables are c
 - [ ] Bulk import optimization
 - [ ] Export functionality for all data types
 - [ ] Advanced filtering and search
-- [ ] Data transformation pipeline
+- [x] Basic data transformation pipeline (field normalization, derived calculations)
 
 ### Medium Term
 
@@ -460,7 +571,7 @@ The application uses JPA/Hibernate for automatic schema generation. Tables are c
 ### Current Limitations
 
 - Single CSV file upload at a time
-- No data transformation capabilities
+- Basic transformation capabilities (field normalization, derived calculations)
 - Limited reporting functionality
 - No user authentication/authorization
 - No audit logging
