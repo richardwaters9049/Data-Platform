@@ -56,6 +56,10 @@ Validation was run with `docker compose config`, `./mvnw test`, `bun run build`,
 
 The upload functionality was already implemented in the frontend but wasn't working due to a Vite proxy chunked transfer encoding issue with multipart/form-data requests. Fixed by configuring the frontend to call the backend directly at `http://localhost:8081/api/upload` instead of using the proxy. The upload now successfully processes CSV files and returns validation results.
 
+03:38 - CORS configuration added for frontend-backend communication.
+
+Fixed "API not reachable" error when uploading CSV files from the frontend. The issue was missing CORS (Cross-Origin Resource Sharing) configuration in the Spring Boot backend. Added `WebConfig.java` with CORS mapping for `/api/** endpoints to allow requests from `http://localhost:5173`. The backend container was rebuilt and restarted, and CORS headers are now properly included in API responses. CSV upload functionality now works end-to-end through the frontend interface.
+
 Next planned step:
 
 Refactor the backend import schema towards automotive data such as vehicle, dealer, warranty, fleet, or service records. Then add Redis-backed summary/query behaviour and expose a simple endpoint to list imported records or return import statistics.
