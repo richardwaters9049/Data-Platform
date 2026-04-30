@@ -183,62 +183,34 @@ sequenceDiagram
 
 ```text
 .
-├── Dockerfile
-├── .dockerignore
-├── docker-compose.yml
-├── frontend/
-│   ├── Dockerfile
-│   ├── src/
-│   │   ├── App.vue
-│   │   ├── main.js
-│   │   └── style.css
-│   ├── package.json
-│   └── bun.lock
-├── pom.xml
-├── samples/
-│   ├── automotive-contacts.csv
-│   ├── dealers.csv
-│   └── vehicles.csv
-├── src/
-│   ├── main/
-│   │   ├── java/com/platform/
-│   │   │   ├── config/
-│   │   │   │   ├── RedisConfig.java
-│   │   │   │   └── WebConfig.java
-│   │   │   ├── controller/
-│   │   │   │   ├── AutomotiveController.java
-│   │   │   │   ├── HealthController.java
-│   │   │   │   ├── RecordsController.java
-│   │   │   │   └── UploadController.java
-│   │   │   ├── dto/
-│   │   │   │   ├── ImportResult.java
-│   │   │   │   └── ValidationError.java
-│   │   │   ├── model/
-│   │   │   │   ├── DataType.java
-│   │   │   │   ├── Dealer.java
-│   │   │   │   ├── Fleet.java
-│   │   │   │   ├── Record.java
-│   │   │   │   ├── Service.java
-│   │   │   │   ├── ServiceRecord.java
-│   │   │   │   ├── Vehicle.java
-│   │   │   │   └── Warranty.java
-│   │   │   ├── repository/
-│   │   │   │   ├── DealerRepository.java
-│   │   │   │   ├── FleetRepository.java
-│   │   │   │   ├── RecordRepository.java
-│   │   │   │   ├── ServiceRecordRepository.java
-│   │   │   │   ├── VehicleRepository.java
-│   │   │   │   └── WarrantyRepository.java
-│   │   │   ├── service/
-│   │   │   │   ├── AutomotiveImportService.java
-│   │   │   │   ├── RecordService.java
-│   │   │   │   └── StatisticsService.java
-│   │   │   └── DataPlatformApplication.java
-│   │   └── resources/
-│   │       └── application.yaml
-│   └── test/
-│       └── java/com/platform/
-└── NOTES.md
+|-- Dockerfile                 # Spring Boot application container
+|-- .dockerignore             # Docker ignore patterns
+|-- docker-compose.yml        # Local development infrastructure
+|-- frontend/                 # Vue.js frontend application
+|   |-- Dockerfile           # Frontend container build
+|   |-- src/                 # Vue components and styles
+|   |-- package.json         # Frontend dependencies
+|   `-- bun.lock            # Bun package manager lock file
+|-- pom.xml                  # Maven build configuration
+|-- samples/                  # Sample CSV files for testing
+|   |-- automotive-contacts.csv
+|   |-- dealers.csv
+|   `-- vehicles.csv
+|-- src/                     # Java backend source code
+|   |-- main/
+|   |   |-- java/com/platform/
+|   |   |   |-- config/      # Spring configuration beans
+|   |   |   |-- controller/  # REST API endpoints
+|   |   |   |-- dto/         # Data transfer objects
+|   |   |   |-- model/       # JPA entity classes
+|   |   |   |-- repository/  # Spring Data repositories
+|   |   |   |-- service/     # Business logic services
+|   |   |   `-- DataPlatformApplication.java
+|   |   `-- resources/
+|   |       `-- application.yaml  # Application configuration
+|   `-- test/                # Unit and integration tests
+|       `-- java/com/platform/
+`-- NOTES.md                # Development notes and TODOs
 ```
 
 ## Getting Started

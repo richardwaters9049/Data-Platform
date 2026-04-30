@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for RecordImportService.
  * Tests the CSV import functionality including validation and persistence of records.
  */
+@SuppressWarnings("unused")
 class RecordImportServiceTest {
 
     // Real parser instance to test actual CSV parsing logic
@@ -30,6 +31,7 @@ class RecordImportServiceTest {
     // Service under test with injected dependencies
     private final RecordImportService service = new RecordImportService(parser, repository);
 
+    @SuppressWarnings("null")
     @Test
     void importsValidCsvRows() throws IOException {
         // Create a CSV with valid, well-formatted rows
@@ -55,6 +57,7 @@ class RecordImportServiceTest {
         verify(repository).saveAll(anyList());
     }
 
+    @SuppressWarnings("null")
     @Test
     void returnsValidationErrorsForInvalidRows() throws IOException {
         // Create a CSV with various validation errors: missing name, invalid email, non-numeric age
