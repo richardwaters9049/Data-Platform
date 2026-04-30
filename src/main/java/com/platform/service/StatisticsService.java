@@ -2,6 +2,7 @@ package com.platform.service;
 
 import com.platform.repository.*;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("unused")
 @Service
 public class StatisticsService {
 
@@ -75,11 +77,12 @@ public class StatisticsService {
         stats.put("servicesByType", getServiceTypeCounts());
 
         // Cache the results
-        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
+        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
         
         return stats;
     }
 
+    @SuppressWarnings("null")
     public Map<String, Object> getVehicleStatistics() {
         String cacheKey = STATS_KEY_PREFIX + "vehicles";
         
@@ -94,10 +97,11 @@ public class StatisticsService {
         stats.put("byStatus", getVehicleStatusCounts());
         stats.put("byMake", getVehicleMakeCounts());
 
-        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
+        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
         return stats;
     }
 
+    @SuppressWarnings("null")
     public Map<String, Object> getDealerStatistics() {
         String cacheKey = STATS_KEY_PREFIX + "dealers";
         
@@ -112,7 +116,7 @@ public class StatisticsService {
         stats.put("byStatus", getDealerStatusCounts());
         stats.put("byState", getDealerStateCounts());
 
-        redisTemplate.opsForValue().set(cacheKey, stats, CACHE_DURATION);
+        redisTemplate.opsForValue().set(cacheKey, stats, Duration.ofMinutes(5));
         return stats;
     }
 

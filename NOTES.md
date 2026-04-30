@@ -117,6 +117,30 @@ Transformed platform from basic contact records to comprehensive automotive data
 
 ---
 
+### **12:59** - Null type safety fixes completed
+
+Fixed null type safety warnings across RecordsController and StatisticsService to improve code quality and eliminate compiler warnings.
+
+**RecordsController Fixes:**
+
+- Added explicit null checks for all `@PathVariable Long id` parameters
+- Returns `400 Bad Request` for null IDs, maintaining existing `404 Not Found` for invalid IDs
+- Updated methods: getVehicle(), getDealer(), getWarranty(), getFleet(), getService()
+
+**StatisticsService Fixes:**
+
+- Replaced `CACHE_DURATION` field usage with direct `Duration.ofMinutes(5)` calls
+- Eliminated null type safety warnings for Duration parameters in Redis operations
+- Maintained Redis caching functionality with 5-minute cache duration
+
+**Benefits:**
+
+- Eliminates all null type safety warnings
+- Improves code robustness with explicit null validation
+- Maintains existing functionality while improving type safety
+
+---
+
 ## **Next Planned Step**
 
 Refactor backend import schema for automotive data (vehicle, dealer, warranty, fleet, service records). Add Redis-backed summary/query behavior and expose endpoints for listing imported records and statistics.

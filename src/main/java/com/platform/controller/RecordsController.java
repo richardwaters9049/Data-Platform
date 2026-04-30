@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+// import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -56,6 +56,9 @@ public class RecordsController {
 
     @GetMapping("/vehicles/{id}")
     public ResponseEntity<Vehicle> getVehicle(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return vehicleRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -84,6 +87,9 @@ public class RecordsController {
 
     @GetMapping("/dealers/{id}")
     public ResponseEntity<Dealer> getDealer(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return dealerRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -112,6 +118,9 @@ public class RecordsController {
 
     @GetMapping("/warranties/{id}")
     public ResponseEntity<Warranty> getWarranty(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return warrantyRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -134,6 +143,9 @@ public class RecordsController {
 
     @GetMapping("/fleets/{id}")
     public ResponseEntity<Fleet> getFleet(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return fleetRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -156,6 +168,9 @@ public class RecordsController {
 
     @GetMapping("/services/{id}")
     public ResponseEntity<ServiceRecord> getService(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return serviceRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
