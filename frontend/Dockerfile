@@ -11,4 +11,3 @@ COPY src ./src
 EXPOSE 5173
 
 CMD ["bun", "run", "dev"]
-

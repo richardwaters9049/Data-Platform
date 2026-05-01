@@ -221,7 +221,7 @@ public class AutomotivePipelineService {
             }
         } catch (Exception e) {
             // Log cache invalidation error but don't fail the pipeline
-            System.err.println("Cache invalidation failed: " + e.getMessage());
+            // TODO: Add proper logging framework (SLF4J)
         }
     }
 

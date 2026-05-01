@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch, nextTick, onMounted } from "vue";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -19,6 +19,7 @@ const errorMessage = ref("");
 const successMessage = ref("");
 const isUploading = ref(false);
 const healthStatus = ref("Not checked");
+const validationErrorsSection = ref(null);
 
 // Mirrors the backend's current CSV contract while the domain schema is still evolving.
 const sampleCsv = `name,email,age
@@ -30,11 +31,28 @@ const hasResult = computed(() => Boolean(result.value));
 const hasValidationErrors = computed(() => result.value?.errors?.length > 0);
 const uploadDisabled = computed(() => !selectedFile.value || isUploading.value);
 
+// Watch for validation errors and scroll to them when they appear
+watch(hasValidationErrors, (hasErrors) => {
+  if (hasErrors) {
+    nextTick(() => {
+      validationErrorsSection.value?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+});
+
+// Auto-check API health on page load
+onMounted(() => {
+  checkHealth();
+});
+
 const healthStatusColor = computed(() => {
   switch (healthStatus.value) {
     case "Online":
       return "bg-green-500";
-    case "Checking":
+    case "Checking..":
       return "bg-yellow-500";
     case "Unavailable":
     case "Not checked":
@@ -53,7 +71,7 @@ function handleFileChange(event) {
 
 // Quick connectivity check for operators before attempting an upload.
 async function checkHealth() {
-  healthStatus.value = "Checking";
+  healthStatus.value = "Checking..";
 
   // Add a small delay to make the checking animation more visible
   await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -94,7 +112,7 @@ async function uploadFile() {
       errorMessage.value = "The import could not be completed.";
     } else if (response.ok || payload.errors?.length > 0) {
       // Show success message and clear file selection for new upload
-      successMessage.value = `Successfully uploaded "${fileName}". ${payload.rowsImported} rows imported, ${payload.rowsRejected} rows rejected.`;
+      successMessage.value = `Successfully uploaded "${fileName}".\n${payload.rowsImported} rows imported.\n${payload.rowsRejected} rows rejected.`;
       selectedFile.value = null;
     }
   } catch {
@@ -142,7 +160,7 @@ async function uploadFile() {
                 class="h-4 w-4 rounded-full transition-all duration-300"
                 :class="[
                   healthStatusColor,
-                  healthStatus === 'Checking' ? 'animate-pulse' : '',
+                  healthStatus === 'Checking..' ? 'animate-pulse' : '',
                 ]"
               ></div>
               <p class="text-xl font-semibold text-[#17202a]">
@@ -210,7 +228,7 @@ async function uploadFile() {
             </label>
 
             <button
-              class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#1d6f78] px-4 text-sm font-semibold text-white transition hover:bg-[#185d65] disabled:cursor-not-allowed disabled:bg-[#9eb3c1]"
+              class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#1d6f78] px-4 text-sm font-semibold text-white transition cursor-pointer hover:bg-[#185d65] disabled:cursor-not-allowed disabled:bg-[#9eb3c1]"
               type="button"
               :disabled="uploadDisabled"
               @click="uploadFile"
@@ -283,7 +301,7 @@ async function uploadFile() {
             class="mt-4 flex gap-2 rounded-md bg-[#eff8f2] p-3 text-sm text-[#276738]"
           >
             <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{{ successMessage }}</span>
+            <span class="whitespace-pre-line">{{ successMessage }}</span>
           </div>
         </div>
 
@@ -303,7 +321,7 @@ async function uploadFile() {
                 <span class="text-sm font-medium text-[#536270]"
                   >PostgreSQL persistence</span
                 >
-                <span class="text-xs text-[#7b8791]"
+                <span class="text-xs text-[#7b8791] py-1"
                   >Durable database storage for validated records</span
                 >
               </div>
@@ -316,7 +334,7 @@ async function uploadFile() {
                 <span class="text-sm font-medium text-[#536270]"
                   >Row validation</span
                 >
-                <span class="text-xs text-[#7b8791]"
+                <span class="text-xs text-[#7b8791] py-1"
                   >Business rules and data quality checks</span
                 >
               </div>
@@ -326,14 +344,14 @@ async function uploadFile() {
               class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
             >
               <div class="flex flex-col">
-                <span class="text-sm font-medium text-[#536270]"
+                <span class="text-sm font-medium text-[#536270] py-1"
                   >Redis summary cache</span
                 >
                 <span class="text-xs text-[#7b8791]"
                   >High-performance caching for statistics</span
                 >
               </div>
-              <AlertTriangle class="h-5 w-5 text-[#9b650c]" />
+              <!-- <AlertTriangle class="h-5 w-5 text-[#9b650c]" /> -->
             </div>
           </div>
         </div>
@@ -343,6 +361,7 @@ async function uploadFile() {
     <!-- Validation report is shown only when the API rejects one or more rows -->
     <section
       v-if="hasValidationErrors"
+      ref="validationErrorsSection"
       class="mx-auto max-w-7xl px-5 pb-8 md:px-8"
     >
       <div class="rounded-md border border-[#e5b8a8] bg-white p-5 shadow-sm">

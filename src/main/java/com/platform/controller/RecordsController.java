@@ -8,9 +8,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-// import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -55,10 +55,7 @@ public class RecordsController {
     }
 
     @GetMapping("/vehicles/{id}")
-    public ResponseEntity<Vehicle> getVehicle(@PathVariable Long id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Vehicle> getVehicle(@PathVariable @NonNull Long id) {
         return vehicleRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -86,10 +83,7 @@ public class RecordsController {
     }
 
     @GetMapping("/dealers/{id}")
-    public ResponseEntity<Dealer> getDealer(@PathVariable Long id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Dealer> getDealer(@PathVariable @NonNull Long id) {
         return dealerRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -117,10 +111,7 @@ public class RecordsController {
     }
 
     @GetMapping("/warranties/{id}")
-    public ResponseEntity<Warranty> getWarranty(@PathVariable Long id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Warranty> getWarranty(@PathVariable @NonNull Long id) {
         return warrantyRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -142,10 +133,7 @@ public class RecordsController {
     }
 
     @GetMapping("/fleets/{id}")
-    public ResponseEntity<Fleet> getFleet(@PathVariable Long id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Fleet> getFleet(@PathVariable @NonNull Long id) {
         return fleetRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -167,10 +155,7 @@ public class RecordsController {
     }
 
     @GetMapping("/services/{id}")
-    public ResponseEntity<ServiceRecord> getService(@PathVariable Long id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<ServiceRecord> getService(@PathVariable @NonNull Long id) {
         return serviceRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
