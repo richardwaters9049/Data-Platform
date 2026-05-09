@@ -1,5 +1,27 @@
 # Project Notes
 
+## **10/05/2026**
+
+---
+
+### **00:52** - Current project status and latest technical changes
+
+The project is now an automotive ETL data platform with a Spring Boot backend, Vue/Tailwind frontend, PostgreSQL persistence, Redis-backed statistics caching, Docker Compose orchestration, and sample automotive CSV files for vehicles and dealers. The application has moved beyond a generic CSV uploader and now demonstrates a clearer industry-style data workflow: ingest automotive CSV data, validate rows, transform values, persist accepted records, expose API endpoints, and serve operational data to the frontend.
+
+Current architecture includes explicit ETL stages:
+
+- `CsvIngestionService` for file reading and row extraction
+- `AutomotiveDataValidator` for business rule and data quality checks
+- `AutomotiveDataTransformer` for normalisation and entity mapping
+- `AutomotivePipelineService` for orchestration, persistence, and cache invalidation
+- PostgreSQL for durable storage
+- Redis for cached statistics
+- Docker Compose for running the full local platform
+
+Latest technical changes add relationship mapping during transformation. Vehicle imports can now carry a dealer code, warranty imports can carry a VIN, and service record imports can carry both VIN and dealer code so the persistence layer can connect records to existing vehicles and dealers where possible. Application configuration was also adjusted for Redis and Hibernate PostgreSQL dialect settings.
+
+Review follow-up needed before committing as final: unresolved dealer/vehicle relationship placeholders should be cleared when a matching existing entity is not found, otherwise JPA may fail on transient related objects. The local Redis default should also stay aligned with the Compose host port when running the backend outside Docker.
+
 ## **30/04/2026**
 
 ---

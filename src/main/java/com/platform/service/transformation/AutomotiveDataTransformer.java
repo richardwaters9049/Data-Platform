@@ -35,6 +35,12 @@ public class AutomotiveDataTransformer {
         vehicle.setEngineSize(parseDouble(parts[8].trim()));
         vehicle.setBodyStyle(normalizeString(parts[9].trim()));
         vehicle.setStatus(normalizeStatus(parts[11].trim()));
+        String dealerCode = normalizeString(parts[10].trim());
+        if (dealerCode != null) {
+            Dealer dealer = new Dealer();
+            dealer.setCode(dealerCode.toUpperCase());
+            vehicle.setDealer(dealer);
+        }
 
         // Derived fields could be calculated here
         // Example: vehicle.setVehicleAge(calculateVehicleAge(vehicle.getYear()));
@@ -77,6 +83,12 @@ public class AutomotiveDataTransformer {
         warranty.setDeductible(parseDouble(parts[6].trim()));
         warranty.setProvider(normalizeString(parts[8].trim()));
         warranty.setStatus(normalizeStatus(parts[9].trim()));
+        String vin = normalizeString(parts[7].trim());
+        if (vin != null) {
+            Vehicle vehicle = new Vehicle();
+            vehicle.setVin(vin.toUpperCase());
+            warranty.setVehicle(vehicle);
+        }
 
         // Derived field: warranty duration could be calculated here
         // warranty.setDurationDays(calculateWarrantyDuration(warranty.getStartDate(), warranty.getEndDate()));
@@ -118,6 +130,18 @@ public class AutomotiveDataTransformer {
         service.setMileage(parseInteger(parts[3].trim()));
         service.setDescription(normalizeString(parts[4].trim()));
         service.setCost(parseDouble(parts[5].trim()));
+        String vin = normalizeString(parts[6].trim());
+        if (vin != null) {
+            Vehicle vehicle = new Vehicle();
+            vehicle.setVin(vin.toUpperCase());
+            service.setVehicle(vehicle);
+        }
+        String dealerCode = normalizeString(parts[7].trim());
+        if (dealerCode != null) {
+            Dealer dealer = new Dealer();
+            dealer.setCode(dealerCode.toUpperCase());
+            service.setDealer(dealer);
+        }
         service.setTechnician(normalizeString(parts[8].trim()));
         service.setStatus(normalizeStatus(parts[9].trim()));
 

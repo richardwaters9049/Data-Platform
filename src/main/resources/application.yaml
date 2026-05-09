@@ -13,7 +13,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:56379}
+      port: ${REDIS_PORT:6379}
 
   jpa:
     hibernate:
@@ -22,3 +22,4 @@ spring:
     properties:
       hibernate:
         format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        dialect: org.hibernate.dialect.PostgreSQLDialect

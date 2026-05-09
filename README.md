@@ -4,9 +4,28 @@ A containerized ETL platform that ingests CSV automotive data, validates it, app
 
 The platform implements a complete Extract-Transform-Load pipeline with robust data quality controls, real-time statistics, and production-grade reliability for automotive industry data workflows.
 
+## Quick Start
+
+From a fresh clone, the platform is designed to run with one Docker command:
+
+```bash
+git clone https://github.com/richardwaters9049/data-platform.git
+cd data-platform
+docker compose up --build
+```
+
+Then open:
+
+- **Frontend**: <http://localhost:5173>
+- **Backend API**: <http://localhost:8081>
+- **Health check**: <http://localhost:8081/health>
+
+The command builds and starts the Vue frontend, Spring Boot backend, PostgreSQL database, and Redis cache. No local Java, Maven, Bun, PostgreSQL, or Redis setup is required for the standard Docker run.
+
 ## Table of Contents
 
 - [Overview](#overview)
+- [Quick Start](#quick-start)
 - [Features](#features)
 - [ETL Pipeline](#etl-pipeline)
 - [Architecture](#architecture)
@@ -341,7 +360,7 @@ The platform is designed with production-grade engineering practices:
 - Docker Desktop or Docker Engine
 - Git
 
-### Quick Start
+### One-Command Docker Run
 
 From a fresh clone, start the complete platform with one command:
 
@@ -355,6 +374,20 @@ This builds and starts all services:
 - Vue.js frontend (port 5173)
 - PostgreSQL database (port 55432)
 - Redis cache (port 56379)
+
+Use this as the default setup path for demonstrations, reviews, and first-time project runs.
+
+To stop the platform:
+
+```bash
+docker compose down
+```
+
+To stop the platform and remove local database/cache volumes:
+
+```bash
+docker compose down -v
+```
 
 ### Access Points
 
@@ -377,7 +410,7 @@ Expected response: `OK`
 
 ### Local Development
 
-For development, you can run services individually:
+For day-to-day development, you can run services individually. This path requires Java 17, the Maven wrapper, Bun, and Docker.
 
 1. Start only the infrastructure:
 
@@ -389,6 +422,12 @@ docker compose up -d postgres redis
 
 ```bash
 ./mvnw spring-boot:run
+```
+
+If you are using the Compose Redis service from the host, set the host Redis port explicitly:
+
+```bash
+REDIS_PORT=56379 ./mvnw spring-boot:run
 ```
 
 3. Run the frontend locally:
