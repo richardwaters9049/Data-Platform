@@ -6,7 +6,7 @@
 
 ### **03:32** - Frontend code refactored into modular composables
 
-Refactored the Vue frontend to improve code organization and maintainability by extracting logic into separate composable files and constants.
+Refactored the Vue frontend to improve code organisation and maintainability by extracting logic into separate composable files and constants.
 
 **New Folder Structure:**
 
@@ -22,7 +22,7 @@ Refactored the Vue frontend to improve code organization and maintainability by 
 **Verification:**
 
 - `npm run build` completed successfully with no errors
-- All functionality preserved while improving code organization
+- All functionality preserved while improving code organisation
 
 ---
 
@@ -124,7 +124,7 @@ Ran app on port `8081` (port `8080` was occupied). Tested health check and CSV u
 
 Added `docker-compose.yml` to define local infrastructure. It starts PostgreSQL 17 on `localhost:55432` with a `dataplatform` database, plus Redis 7 Alpine on `localhost:56379`. Both services have named Docker volumes for data persistence and health checks.
 
-Spring configuration updated to override server port, database settings, Redis settings, and JPA logging/schema behavior with environment variables.
+Spring configuration updated to override server port, database settings, Redis settings, and JPA logging/schema behaviour with environment variables.
 
 `docker compose config` passed, and `./mvnw test` passed with 3 tests and 0 failures.
 
@@ -237,11 +237,11 @@ Refactored Spring Boot service layer to implement clear ETL pipeline architectur
 
 **New Package Structure:**
 
-```
+```text
 service/
 ingestion/CsvIngestionService.java          # CSV file reading & raw data extraction
 validation/AutomotiveDataValidator.java      # Business rules & data validation
-transformation/AutomotiveDataTransformer.java # Data normalization & derived fields
+transformation/AutomotiveDataTransformer.java # Data normalisation & derived fields
 pipeline/AutomotivePipelineService.java      # ETL orchestrator
 ```
 
@@ -258,7 +258,7 @@ pipeline/AutomotivePipelineService.java      # ETL orchestrator
 
 1. **INGESTION**: `CsvIngestionService.ingestCsv()` - Read CSV files and extract raw data
 2. **VALIDATION**: `AutomotiveDataValidator.validate*()` - Apply business rules and constraints
-3. **TRANSFORMATION**: `AutomotiveDataTransformer.transform*()` - Normalize data and calculate derived fields
+3. **TRANSFORMATION**: `AutomotiveDataTransformer.transform*()` - Normalise data and calculate derived fields
 4. **PERSISTENCE**: Repository operations - Store to PostgreSQL with relationship handling
 5. **CACHE INVALIDATION**: Clear Redis statistics cache for fresh data
 
