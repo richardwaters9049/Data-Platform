@@ -1,5 +1,53 @@
 # Project Notes
 
+## **11/05/2026**
+
+---
+
+### **00:33** - Project directory reorganised and frontend structure clarified
+
+Reorganised the main project directory to reduce clutter and improve navigation. Renamed frontend/src to frontend/app to avoid confusion with the main src directory.
+
+**Directory Reorganisation:**
+
+- Created `docs/` directory and consolidated documentation:
+  - Moved `Interview-info/` to `docs/Interview-info/`
+  - Moved `NOTES.md` to `docs/NOTES.md`
+  - Moved `HELP.md` to `docs/HELP.md`
+- Created `data/` directory for sample data:
+  - Moved `samples/automotive-contacts.csv` to `data/automotive-contacts.csv`
+  - Moved `samples/dealers.csv` to `data/dealers.csv`
+  - Moved `samples/vehicles.csv` to `data/vehicles.csv`
+- Removed empty `samples/` directory
+- Updated `.gitignore` to reflect new paths (`docs/Interview-info/`, `docs/HELP.md`)
+
+**Frontend Directory Rename:**
+
+- Renamed `frontend/src/` to `frontend/app/` to avoid confusion with main `src/` directory
+- Updated `frontend/Dockerfile`: `COPY src ./src` → `COPY app ./app`
+- Updated `frontend/Dockerfile.dev` comment to reference app directory
+- Updated `frontend/index.html`: `src="/src/main.js"` → `src="/app/main.js"`
+- Updated `docker-compose.yml`: volume mount `./frontend/src:/app/src` → `./frontend/app:/app/app`
+- Updated `frontend/vite.config.js`: added `root: "."` for correct serving
+
+**Benefits:**
+
+- Cleaner root directory with only essential project files
+- Clear separation between documentation and code
+- No confusion between frontend source directory and main Java source directory
+- All references updated consistently across configuration files
+
+**Files Updated:**
+
+- `.gitignore` - Updated ignore paths
+- `docker-compose.yml` - Frontend volume mount
+- `frontend/Dockerfile` - Source directory reference
+- `frontend/Dockerfile.dev` - Comment reference
+- `frontend/index.html` - Script source reference
+- `frontend/vite.config.js` - Root directory configuration
+
+---
+
 ## **10/05/2026**
 
 ---

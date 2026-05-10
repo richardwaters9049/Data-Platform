@@ -1,6 +1,6 @@
 # Automotive ETL Data Platform
 
-A containerized ETL platform that ingests CSV automotive data, validates it, applies transformations, stores it in PostgreSQL, and serves it via a cached API.
+A containerised ETL platform that ingests CSV automotive data, validates it, applies transformations, stores it in PostgreSQL, and serves it via a cached API.
 
 The platform implements a complete Extract-Transform-Load pipeline with robust data quality controls, real-time statistics, and production-grade reliability for automotive industry data workflows.
 
@@ -44,13 +44,13 @@ The command builds and starts the Vue frontend, Spring Boot backend, PostgreSQL 
 The Automotive ETL Data Platform is a production-grade data integration system designed specifically for automotive industry data workflows. It provides a complete Extract-Transform-Load solution for:
 
 - **Data Ingestion**: Multi-domain CSV import with robust error handling and validation
-- **Data Transformation**: Field normalization, derived calculations, and data enrichment
+- **Data Transformation**: Field normalisation, derived calculations, and data enrichment
 - **Data Quality**: Row-level validation with detailed error reporting and partial success handling
 - **Reliable Storage**: PostgreSQL with proper indexing and data integrity
 - **Real-time Serving**: Redis-powered caching for high-performance data access
 - **Pipeline Interface**: Vue.js frontend for monitoring and interacting with the ETL pipeline
 
-The platform is built with production-grade patterns including validation-first ingestion, cache invalidation strategies, idempotent operations, and scalable containerized deployment.
+The platform is built with production-grade patterns including validation-first ingestion, cache invalidation strategies, idempotent operations, and scalable containerised deployment.
 
 ## Features
 
@@ -58,7 +58,7 @@ The platform is built with production-grade patterns including validation-first 
 
 - **Multi-format CSV Ingestion**: Support for different automotive data schemas with validation
 - **Row-level Validation**: Detailed validation with specific error messages and partial success handling
-- **Data Transformation**: Field normalization and derived field calculations
+- **Data Transformation**: Field normalisation and derived field calculations
 - **Real-time Statistics**: Cached statistics for high-performance data access
 - **Data Management APIs**: CRUD operations for all data types with proper error handling
 - **Health Monitoring**: Application and database health checks for system reliability
@@ -75,7 +75,7 @@ The platform is built with production-grade patterns including validation-first 
 
 - **Redis Caching**: 5-minute cache for statistics and query results with automatic invalidation
 - **PostgreSQL Storage**: Durable relational database with proper indexing and data integrity
-- **Docker Deployment**: Complete containerized infrastructure for scalable deployment
+- **Docker Deployment**: Complete containerised infrastructure for scalable deployment
 - **API Documentation**: RESTful endpoints with proper HTTP semantics
 - **Error Handling**: Comprehensive validation and error reporting for data quality assurance
 
@@ -103,14 +103,14 @@ The validation stage ensures data quality by applying business rules, constraint
 - **Comprehensive error reporting** with specific field-level error messages
 - **Validation statistics** showing success/failure rates for data quality monitoring
 
-### Transform → Normalization & Derived Fields
+### Transform → Normalisation & Derived Fields
 
-The transformation stage normalizes data formats, calculates derived fields, and applies business logic to prepare data for storage.
+The transformation stage normalises data formats, calculates derived fields, and applies business logic to prepare data for storage.
 
-- Field normalization (case, whitespace, format standardization)
+- Field normalisation (case, whitespace, format standardisation)
 - Derived field calculations (vehicle age, warranty duration)
-- Status mapping and enum normalization
-- Geographic data standardization
+- Status mapping and enum normalisation
+- Geographic data standardisation
 - Business logic transformations
 
 ### Load → PostgreSQL
@@ -286,12 +286,12 @@ The platform is designed with production-grade engineering practices:
 - Clear boundaries between validation, transformation, and storage
 - Service layer encapsulates business logic
 - Repository pattern for data access abstraction
-- Configuration externalization for different environments
+- Configuration externalisation for different environments
 
 ### Scalability Design
 
 - Stateless application services enable horizontal scaling
-- Containerized deployment with Docker Compose
+- Containerised deployment with Docker Compose
 - Redis caching reduces database load
 - Proper indexing for query performance
 - Connection pooling for database efficiency
@@ -570,7 +570,7 @@ bun run build
 
 ## Development
 
-### Code Organization
+### Code Organisation
 
 - **Controllers**: Handle HTTP requests and responses
 - **Services**: Business logic and orchestration
@@ -596,10 +596,10 @@ The application uses JPA/Hibernate for automatic schema generation. Tables are c
 ### Near Term
 
 - [ ] Enhanced data validation rules
-- [ ] Bulk import optimization
+- [ ] Bulk import optimisation
 - [ ] Export functionality for all data types
 - [ ] Advanced filtering and search
-- [x] Basic data transformation pipeline (field normalization, derived calculations)
+- [x] Basic data transformation pipeline (field normalisation, derived calculations)
 
 ### Medium Term
 
@@ -620,16 +620,16 @@ The application uses JPA/Hibernate for automatic schema generation. Tables are c
 ### Current Limitations
 
 - Single CSV file upload at a time
-- Basic transformation capabilities (field normalization, derived calculations)
+- Basic transformation capabilities (field normalisation, derived calculations)
 - Limited reporting functionality
-- No user authentication/authorization
+- No user authentication/authorisation
 - No audit logging
 
 ---
 
-## License
+## Licence
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT Licence - see the LICENCE file for details.
 
 ## Contributing
 
