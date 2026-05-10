@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, nextTick, onMounted } from "vue";
+import { computed, onMounted, ref, watch, nextTick } from "vue";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -8,30 +8,103 @@ import {
   FileSpreadsheet,
   Gauge,
   Loader2,
+  Moon,
+  RefreshCw,
   Server,
+  Sun,
   Upload,
   XCircle,
 } from "lucide-vue-next";
 
+const isDarkMode = ref(false);
+const dataTypes = ref([]);
+const selectedDataTypeName = ref("VEHICLE");
 const selectedFile = ref(null);
 const result = ref(null);
 const errorMessage = ref("");
 const successMessage = ref("");
 const isUploading = ref(false);
+const isLoadingDataTypes = ref(false);
+const isLoadingRecords = ref(false);
 const healthStatus = ref("Not checked");
+const statistics = ref(null);
+const records = ref([]);
 const validationErrorsSection = ref(null);
 
-// Mirrors the backend's current CSV contract while the domain schema is still evolving.
-const sampleCsv = `name,email,age
-Dealer Contact,dealer.ops@example.com,42
-Warranty Analyst,warranty@example.com,36
-Fleet Coordinator,fleet@example.com,29`;
+const sampleCsvByType = {
+  VEHICLE: `vin,make,model,year,trim,color,fuelType,transmission,engineSize,bodyStyle,dealerCode,status
+SALAB2BN1HH123456,Jaguar,F-Pace,2024,R-Dynamic,Blue,Petrol,Automatic,2.0,SUV,DLR001,Active`,
+  DEALER: `code,name,address,city,state,zipCode,phone,email,website,status
+DLR001,North Wales Jaguar,Parc Menai,Bangor,Gwynedd,LL57 4BN,01248 000000,ops@nwjaguar.example,nwjaguar.example,Active`,
+  WARRANTY: `warrantyNumber,warrantyType,startDate,endDate,mileageLimit,coverage,deductible,vin,provider,status
+WRN-1001,Extended,2026-01-01,2029-01-01,60000,Powertrain,250,SALAB2BN1HH123456,Manufacturer,Active`,
+  FLEET: `fleetCode,fleetName,company,address,city,state,zipCode,contactPerson,contactPhone,contactEmail,vehicleCount,status
+FLT001,Executive Vehicles,Example Logistics,Parc Menai,Bangor,Gwynedd,LL57 4BN,A Morgan,01248 111111,fleet@example.com,24,Active`,
+  SERVICE_RECORD: `serviceNumber,serviceType,serviceDate,mileage,description,cost,vin,dealerCode,technician,status
+SRV-1001,Oil Change,2026-02-14,12000,Scheduled service,189.99,SALAB2BN1HH123456,DLR001,A Morgan,Completed`,
+};
 
+const endpointByType = {
+  VEHICLE: "/api/records/vehicles",
+  DEALER: "/api/records/dealers",
+  WARRANTY: "/api/records/warranties",
+  FLEET: "/api/records/fleets",
+  SERVICE_RECORD: "/api/records/services",
+};
+
+const selectedDataType = computed(() =>
+  dataTypes.value.find((type) => type.name === selectedDataTypeName.value)
+);
+const selectedSchemaFields = computed(() => selectedDataType.value?.fields ?? []);
+const sampleCsv = computed(() => sampleCsvByType[selectedDataTypeName.value] ?? "");
 const hasResult = computed(() => Boolean(result.value));
 const hasValidationErrors = computed(() => result.value?.errors?.length > 0);
 const uploadDisabled = computed(() => !selectedFile.value || isUploading.value);
+const themeLabel = computed(() => isDarkMode.value ? "Light mode" : "Dark mode");
+const importedTotal = computed(() => {
+  if (!statistics.value) {
+    return 0;
+  }
 
-// Watch for validation errors and scroll to them when they appear
+  return [
+    statistics.value.totalVehicles,
+    statistics.value.totalDealers,
+    statistics.value.totalWarranties,
+    statistics.value.totalFleets,
+    statistics.value.totalServices,
+  ].reduce((total, value) => total + Number(value ?? 0), 0);
+});
+
+const recordColumns = computed(() => {
+  switch (selectedDataTypeName.value) {
+    case "DEALER":
+      return ["code", "name", "city", "status"];
+    case "WARRANTY":
+      return ["warrantyNumber", "warrantyType", "provider", "status"];
+    case "FLEET":
+      return ["fleetCode", "fleetName", "company", "status"];
+    case "SERVICE_RECORD":
+      return ["serviceNumber", "serviceType", "technician", "status"];
+    case "VEHICLE":
+    default:
+      return ["vin", "make", "model", "status"];
+  }
+});
+
+const healthStatusColor = computed(() => {
+  switch (healthStatus.value) {
+    case "Online":
+      return "bg-green-500";
+    case "Checking":
+      return "bg-yellow-500";
+    case "Unavailable":
+    case "Not checked":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
+  }
+});
+
 watch(hasValidationErrors, (hasErrors) => {
   if (hasErrors) {
     nextTick(() => {
@@ -43,23 +116,16 @@ watch(hasValidationErrors, (hasErrors) => {
   }
 });
 
-// Auto-check API health on page load
-onMounted(() => {
-  checkHealth();
+watch(selectedDataTypeName, () => {
+  result.value = null;
+  errorMessage.value = "";
+  successMessage.value = "";
+  selectedFile.value = null;
+  fetchRecords();
 });
 
-const healthStatusColor = computed(() => {
-  switch (healthStatus.value) {
-    case "Online":
-      return "bg-green-500";
-    case "Checking..":
-      return "bg-yellow-500";
-    case "Unavailable":
-    case "Not checked":
-      return "bg-red-500";
-    default:
-      return "bg-gray-500";
-  }
+onMounted(async () => {
+  await Promise.all([checkHealth(), fetchDataTypes(), refreshDashboard()]);
 });
 
 function handleFileChange(event) {
@@ -69,18 +135,63 @@ function handleFileChange(event) {
   successMessage.value = "";
 }
 
-// Quick connectivity check for operators before attempting an upload.
 async function checkHealth() {
-  healthStatus.value = "Checking..";
-
-  // Add a small delay to make the checking animation more visible
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  healthStatus.value = "Checking";
 
   try {
     const response = await fetch("/health");
     healthStatus.value = response.ok ? "Online" : "Unavailable";
   } catch {
     healthStatus.value = "Unavailable";
+  }
+}
+
+async function fetchDataTypes() {
+  isLoadingDataTypes.value = true;
+
+  try {
+    const response = await fetch("/api/automotive/data-types");
+    if (!response.ok) {
+      throw new Error("Could not load data types");
+    }
+    dataTypes.value = await response.json();
+  } catch {
+    errorMessage.value = "Automotive data types could not be loaded.";
+  } finally {
+    isLoadingDataTypes.value = false;
+  }
+}
+
+async function refreshDashboard() {
+  await Promise.all([fetchStatistics(), fetchRecords()]);
+}
+
+async function fetchStatistics() {
+  try {
+    const response = await fetch("/api/records/statistics/overall");
+    if (response.ok) {
+      statistics.value = await response.json();
+    }
+  } catch {
+    statistics.value = null;
+  }
+}
+
+async function fetchRecords() {
+  isLoadingRecords.value = true;
+
+  try {
+    const endpoint = endpointByType[selectedDataTypeName.value];
+    const response = await fetch(`${endpoint}?page=0&size=5&sortBy=id&sortDir=desc`);
+    if (!response.ok) {
+      throw new Error("Could not load records");
+    }
+    const payload = await response.json();
+    records.value = payload.content ?? [];
+  } catch {
+    records.value = [];
+  } finally {
+    isLoadingRecords.value = false;
   }
 }
 
@@ -99,8 +210,7 @@ async function uploadFile() {
   const fileName = selectedFile.value.name;
 
   try {
-    // Browser can reach backend at localhost:8081 when frontend is at localhost:5173
-    const response = await fetch("http://localhost:8081/api/upload", {
+    const response = await fetch(`/api/automotive/upload/${selectedDataTypeName.value}`, {
       method: "POST",
       body: formData,
     });
@@ -110,114 +220,119 @@ async function uploadFile() {
 
     if (!response.ok && !payload.errors?.length) {
       errorMessage.value = "The import could not be completed.";
-    } else if (response.ok || payload.errors?.length > 0) {
-      // Show success message and clear file selection for new upload
-      successMessage.value = `Successfully uploaded "${fileName}".\n${payload.rowsImported} rows imported.\n${payload.rowsRejected} rows rejected.`;
+    } else {
+      successMessage.value = `${fileName} processed as ${selectedDataType.value?.displayName ?? selectedDataTypeName.value}. ${payload.rowsImported} rows imported, ${payload.rowsRejected} rejected.`;
       selectedFile.value = null;
+      await refreshDashboard();
     }
   } catch {
-    errorMessage.value =
-      "The API is not reachable. Check that the backend is running.";
+    errorMessage.value = "The API is not reachable. Check that the backend is running.";
   } finally {
     isUploading.value = false;
   }
 }
+
+function toggleTheme() {
+  isDarkMode.value = !isDarkMode.value;
+}
 </script>
 
 <template>
-  <main class="min-h-screen bg-[#eef2f5] text-[#17202a]">
-    <!-- Header and API health panel -->
-    <section class="border-b border-[#cfd8df] bg-white">
-      <div
-        class="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-6 md:px-8 lg:flex-row lg:items-center lg:justify-between"
-      >
-        <div>
-          <p
-            class="text-sm font-semibold uppercase tracking-[0.12em] text-[#1d6f78]"
-          >
+  <main class="app-shell" :class="{ 'theme-dark': isDarkMode }">
+    <section class="hero-panel">
+      <div class="page-frame hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow">
             Data Platform
           </p>
-          <h1 class="mt-2 text-3xl font-semibold text-[#17202a] md:text-4xl">
+          <h1>
             Automotive data ingestion console
           </h1>
-          <p class="mt-3 max-w-3xl text-base leading-7 text-[#536270]">
-            Upload dealership, fleet, warranty, or customer contact data and
-            inspect the import result before it moves further through the
-            platform.
+          <p class="hero-text">
+            Load dealer, vehicle, warranty, fleet, and service feeds into the
+            ETL pipeline, review validation output, and inspect the latest
+            persisted records.
           </p>
         </div>
 
-        <div class="grid min-w-72 grid-cols-2 gap-3">
-          <div class="rounded-md border border-[#d8e0e6] bg-[#f8fafb] p-4">
-            <div
-              class="flex items-center gap-2 text-sm font-medium text-[#536270]"
-            >
-              <Server class="h-4 w-4 text-[#1d6f78]" />
+        <div class="hero-actions">
+          <div class="status-card">
+            <div class="label-row">
+              <Server class="icon-small" />
               API
             </div>
-            <div class="mt-2 flex items-center gap-3">
+            <div class="status-value">
               <div
-                class="h-4 w-4 rounded-full transition-all duration-300"
-                :class="[
-                  healthStatusColor,
-                  healthStatus === 'Checking..' ? 'animate-pulse' : '',
-                ]"
+                class="status-dot"
+                :class="[healthStatusColor, healthStatus === 'Checking' ? 'animate-pulse' : '']"
               ></div>
-              <p class="text-xl font-semibold text-[#17202a]">
+              <p>
                 {{ healthStatus }}
               </p>
             </div>
           </div>
           <button
-            class="rounded-md bg-[#17202a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#263442] hover:cursor-pointer disabled:bg-[#7b8791]"
+            class="button button-secondary"
             type="button"
             @click="checkHealth"
           >
+            <RefreshCw class="icon-small" />
             Check API
+          </button>
+          <button
+            class="button button-ghost"
+            type="button"
+            :aria-label="themeLabel"
+            @click="toggleTheme"
+          >
+            <Sun v-if="isDarkMode" class="icon-small" />
+            <Moon v-else class="icon-small" />
+            {{ themeLabel }}
           </button>
         </div>
       </div>
     </section>
 
-    <!-- Upload workspace and operational status panels -->
-    <section
-      class="mx-auto grid max-w-7xl gap-5 px-5 py-6 md:px-8 lg:grid-cols-[1.2fr_0.8fr]"
-    >
-      <div class="rounded-md border border-[#cfd8df] bg-white p-5 shadow-sm">
-        <div
-          class="flex flex-col gap-4 border-b border-[#e2e8ed] pb-5 md:flex-row md:items-center md:justify-between"
-        >
+    <section class="page-frame dashboard-grid">
+      <div class="panel import-panel">
+        <div class="panel-header">
           <div>
-            <div
-              class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#1d6f78]"
-            >
-              <FileSpreadsheet class="h-4 w-4" />
+            <div class="eyebrow inline-eyebrow">
+              <FileSpreadsheet class="icon-small" />
               CSV import
             </div>
-            <h2 class="mt-2 text-2xl font-semibold text-[#17202a]">
-              Upload source data
+            <h2>
+              Upload automotive source data
             </h2>
           </div>
-          <div
-            class="rounded-md bg-[#f3f6f8] px-3 py-2 text-sm font-medium text-[#536270]"
-          >
-            Accepted: name, email, age
-          </div>
+          <label class="field-label">
+            Data type
+            <select
+              v-model="selectedDataTypeName"
+              class="select-control"
+              :disabled="isLoadingDataTypes"
+            >
+              <option
+                v-for="dataType in dataTypes"
+                :key="dataType.name"
+                :value="dataType.name"
+              >
+                {{ dataType.displayName }}
+              </option>
+            </select>
+          </label>
         </div>
 
-        <div class="mt-5 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+        <div class="import-grid">
           <div>
-            <label
-              class="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-[#9eb3c1] bg-[#f8fafb] px-5 py-8 text-center transition hover:border-[#1d6f78] hover:bg-[#f1f7f8]"
-            >
-              <Upload class="h-9 w-9 text-[#1d6f78]" />
-              <span class="mt-4 text-lg font-semibold text-[#17202a]">
+            <label class="drop-zone">
+              <Upload class="drop-icon" />
+              <span class="drop-title">
                 {{ selectedFile ? selectedFile.name : "Choose a CSV file" }}
               </span>
-              <span class="mt-2 max-w-md text-sm leading-6 text-[#536270]">
-                Current backend schema accepts contact-style records.
-                Vehicle-specific fields will be added in the next backend
-                iteration.
+              <span class="drop-copy">
+                The selected file will run through ingestion, validation,
+                transformation, persistence, and statistics cache refresh.
               </span>
               <input
                 class="sr-only"
@@ -228,168 +343,179 @@ async function uploadFile() {
             </label>
 
             <button
-              class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#1d6f78] px-4 text-sm font-semibold text-white transition cursor-pointer hover:bg-[#185d65] disabled:cursor-not-allowed disabled:bg-[#9eb3c1]"
+              class="button button-primary upload-button"
               type="button"
               :disabled="uploadDisabled"
               @click="uploadFile"
             >
-              <Loader2 v-if="isUploading" class="h-4 w-4 animate-spin" />
-              <Upload v-else class="h-4 w-4" />
+              <Loader2 v-if="isUploading" class="icon-small animate-spin" />
+              <Upload v-else class="icon-small" />
               {{ isUploading ? "Importing" : "Upload CSV" }}
             </button>
           </div>
 
-          <div
-            class="rounded-md border border-[#d8e0e6] bg-[#101820] p-4 text-sm text-[#e7eef3]"
-          >
-            <div class="mb-3 flex items-center gap-2 text-[#8bd3dd]">
-              <ClipboardList class="h-4 w-4" />
-              <span class="font-semibold">Sample feed</span>
+          <div class="code-panel">
+            <div class="code-heading">
+              <ClipboardList class="icon-small" />
+              <span>Expected schema</span>
             </div>
-            <pre class="overflow-x-auto whitespace-pre-wrap leading-6">{{
-              sampleCsv
-            }}</pre>
+            <div class="schema-list">
+              <span
+                v-for="field in selectedSchemaFields"
+                :key="field"
+                class="schema-chip"
+              >
+                {{ field }}
+              </span>
+            </div>
+            <div class="code-heading">
+              <ClipboardList class="icon-small" />
+              <span>Sample feed</span>
+            </div>
+            <pre>{{ sampleCsv }}</pre>
           </div>
         </div>
       </div>
 
-      <aside class="grid gap-5">
-        <div class="rounded-md border border-[#cfd8df] bg-white p-5 shadow-sm">
-          <div
-            class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#1d6f78]"
-          >
-            <Gauge class="h-4 w-4" />
+      <aside class="side-stack">
+        <div class="panel summary-panel">
+          <div class="eyebrow inline-eyebrow">
+            <Gauge class="icon-small" />
             Import summary
           </div>
 
-          <div v-if="hasResult" class="mt-5 grid grid-cols-3 gap-3">
-            <div class="rounded-md bg-[#f3f6f8] p-3">
-              <p class="text-sm text-[#536270]">Read</p>
-              <p class="mt-1 text-2xl font-semibold">{{ result.rowsRead }}</p>
+          <div v-if="hasResult" class="metric-grid">
+            <div class="metric-tile neutral">
+              <p class="metric-label">Read</p>
+              <p class="metric-value">{{ result.rowsRead }}</p>
             </div>
-            <div class="rounded-md bg-[#eff8f2] p-3">
-              <p class="text-sm text-[#416b4b]">Imported</p>
-              <p class="mt-1 text-2xl font-semibold text-[#276738]">
+            <div class="metric-tile success">
+              <p class="metric-label">Imported</p>
+              <p class="metric-value">
                 {{ result.rowsImported }}
               </p>
             </div>
-            <div class="rounded-md bg-[#fff5e5] p-3">
-              <p class="text-sm text-[#815d18]">Rejected</p>
-              <p class="mt-1 text-2xl font-semibold text-[#9b650c]">
+            <div class="metric-tile warning">
+              <p class="metric-label">Rejected</p>
+              <p class="metric-value">
                 {{ result.rowsRejected }}
               </p>
             </div>
           </div>
 
-          <div
-            v-else
-            class="mt-5 rounded-md bg-[#f8fafb] p-4 text-sm leading-6 text-[#536270]"
-          >
+          <div v-else class="empty-state">
             No import has been run in this session.
           </div>
 
-          <div
-            v-if="errorMessage"
-            class="mt-4 flex gap-2 rounded-md bg-[#fff1f0] p-3 text-sm text-[#9f2d22]"
-          >
-            <XCircle class="mt-0.5 h-4 w-4 shrink-0" />
+          <div v-if="errorMessage" class="message message-error">
+            <XCircle class="message-icon" />
             <span>{{ errorMessage }}</span>
           </div>
 
-          <div
-            v-if="successMessage"
-            class="mt-4 flex gap-2 rounded-md bg-[#eff8f2] p-3 text-sm text-[#276738]"
-          >
-            <CheckCircle2 class="mt-0.5 h-4 w-4 shrink-0" />
-            <span class="whitespace-pre-line">{{ successMessage }}</span>
+          <div v-if="successMessage" class="message message-success">
+            <CheckCircle2 class="message-icon" />
+            <span>{{ successMessage }}</span>
           </div>
         </div>
 
-        <div class="rounded-md border border-[#cfd8df] bg-white p-5 shadow-sm">
-          <div
-            class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#1d6f78]"
-          >
-            <Database class="h-4 w-4" />
-            Pipeline status
+        <div class="panel snapshot-panel">
+          <div class="section-toolbar">
+            <div class="eyebrow inline-eyebrow">
+              <Database class="icon-small" />
+              Platform snapshot
+            </div>
+            <button
+              class="button button-outline"
+              type="button"
+              @click="refreshDashboard"
+            >
+              <RefreshCw class="icon-tiny" />
+              Refresh
+            </button>
           </div>
 
-          <div class="mt-5 space-y-3">
-            <div
-              class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
-            >
-              <div class="flex flex-col">
-                <span class="text-sm font-medium text-[#536270]"
-                  >PostgreSQL persistence</span
-                >
-                <span class="text-xs text-[#7b8791] py-1"
-                  >Durable database storage for validated records</span
-                >
-              </div>
-              <CheckCircle2 class="h-5 w-5 text-[#276738]" />
+          <div class="snapshot-stats">
+            <div class="snapshot-stat">
+              <p>Stored rows</p>
+              <strong>{{ importedTotal }}</strong>
             </div>
-            <div
-              class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
-            >
-              <div class="flex flex-col">
-                <span class="text-sm font-medium text-[#536270]"
-                  >Row validation</span
-                >
-                <span class="text-xs text-[#7b8791] py-1"
-                  >Business rules and data quality checks</span
-                >
-              </div>
-              <CheckCircle2 class="h-5 w-5 text-[#276738]" />
+            <div class="snapshot-stat">
+              <p>Current view</p>
+              <strong>{{ records.length }}</strong>
             </div>
-            <div
-              class="flex items-center justify-between rounded-md bg-[#f3f6f8] px-3 py-3"
-            >
-              <div class="flex flex-col">
-                <span class="text-sm font-medium text-[#536270] py-1"
-                  >Redis summary cache</span
+          </div>
+
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th
+                    v-for="column in recordColumns"
+                    :key="column"
+                  >
+                    {{ column }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="isLoadingRecords">
+                  <td :colspan="recordColumns.length">
+                    Loading latest records...
+                  </td>
+                </tr>
+                <tr v-else-if="records.length === 0">
+                  <td :colspan="recordColumns.length">
+                    No records found for this data type.
+                  </td>
+                </tr>
+                <tr
+                  v-for="record in records"
+                  v-else
+                  :key="record.id"
                 >
-                <span class="text-xs text-[#7b8791]"
-                  >High-performance caching for statistics</span
-                >
-              </div>
-              <!-- <AlertTriangle class="h-5 w-5 text-[#9b650c]" /> -->
-            </div>
+                  <td
+                    v-for="column in recordColumns"
+                    :key="column"
+                    :title="String(record[column] ?? '')"
+                  >
+                    {{ record[column] ?? "-" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </aside>
     </section>
 
-    <!-- Validation report is shown only when the API rejects one or more rows -->
     <section
       v-if="hasValidationErrors"
       ref="validationErrorsSection"
-      class="mx-auto max-w-7xl px-5 pb-8 md:px-8"
+      class="page-frame validation-section"
     >
-      <div class="rounded-md border border-[#e5b8a8] bg-white p-5 shadow-sm">
-        <div
-          class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#9f2d22]"
-        >
-          <AlertTriangle class="h-4 w-4" />
+      <div class="panel validation-panel">
+        <div class="eyebrow danger inline-eyebrow">
+          <AlertTriangle class="icon-small" />
           Validation errors
         </div>
 
-        <div class="mt-4 overflow-hidden rounded-md border border-[#ead4cc]">
-          <table class="w-full table-fixed border-collapse text-left text-sm">
-            <thead class="bg-[#fff1f0] text-[#7d281f]">
+        <div class="table-shell validation-table">
+          <table>
+            <thead>
               <tr>
-                <th class="w-24 px-4 py-3 font-semibold">Row</th>
-                <th class="w-36 px-4 py-3 font-semibold">Field</th>
-                <th class="px-4 py-3 font-semibold">Issue</th>
+                <th>Row</th>
+                <th>Field</th>
+                <th>Issue</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="error in result.errors"
                 :key="`${error.rowNumber}-${error.field}-${error.message}`"
-                class="border-t border-[#ead4cc]"
               >
-                <td class="px-4 py-3 font-medium">{{ error.rowNumber }}</td>
-                <td class="px-4 py-3">{{ error.field }}</td>
-                <td class="px-4 py-3">{{ error.message }}</td>
+                <td>{{ error.rowNumber }}</td>
+                <td>{{ error.field }}</td>
+                <td>{{ error.message }}</td>
               </tr>
             </tbody>
           </table>

@@ -4,6 +4,42 @@
 
 ---
 
+### **02:03** - Dashboard palette moved to dark blue
+
+Adjusted the dashboard theme away from green/teal and into a darker blue product palette. The updated styling uses navy backgrounds, blue brand accents, blue schema chips, and a warmer gold accent for contrast while keeping success/error colours readable.
+
+Verified with `bun run build` and a browser reload on `http://localhost:5173` with no console errors.
+
+---
+
+### **02:00** - Dashboard visual polish and theme mode added
+
+Improved the Vue dashboard spacing and fixed the import summary metric layout so `Read`, `Imported`, and `Rejected` values can wrap responsively without overflowing their panel.
+
+Added a smarter light/dark theme system with CSS variables, subtle gradients, stronger dashboard contrast, refreshed buttons, improved focus states, and cursor pointers for interactive controls. The dashboard now feels more like an operational data product rather than a basic scaffold.
+
+Verified with `bun run build`, `./mvnw test`, and a browser smoke test on `http://localhost:5173` covering the theme toggle and console errors.
+
+---
+
+### **01:52** - Frontend connected to automotive ETL endpoints
+
+Reworked the Vue ingestion console so it now uses the automotive API instead of the original generic contact upload route. Operators can choose the feed type, preview the expected schema, view a sample CSV for the selected automotive dataset, upload to `/api/automotive/upload/{dataType}`, and refresh recent persisted records from the matching `/api/records` endpoint.
+
+Added a platform snapshot panel showing total stored automotive rows and the latest records for the selected data type. Fixed the dashboard total so it sums the backend statistics fields correctly across vehicles, dealers, warranties, fleets, and service records.
+
+Verified with `bun run build`, `./mvnw test`, Docker container status, and a browser smoke test against `http://localhost:5173`.
+
+---
+
+### **01:02** - Automotive relationship regression tests added
+
+Added a focused unit test suite for `AutomotivePipelineService` to protect the relationship persistence behaviour. The tests cover vehicle imports with existing and missing dealers, warranty imports with existing and missing vehicles, and service-record imports with existing and missing vehicle/dealer relationships.
+
+The backend test suite now has 9 tests, all passing via `./mvnw test`.
+
+---
+
 ### **00:56** - Review findings fixed for relationship persistence and Redis configuration
 
 Fixed the first review step by updating automotive relationship persistence. Vehicle, warranty, and service-record imports now clear unresolved dealer or vehicle placeholders when the referenced dealer code or VIN does not already exist, preventing JPA transient object failures while still allowing valid rows to import.
