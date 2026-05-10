@@ -53,14 +53,20 @@ const endpointByType = {
 };
 
 const selectedDataType = computed(() =>
-  dataTypes.value.find((type) => type.name === selectedDataTypeName.value)
+  dataTypes.value.find((type) => type.name === selectedDataTypeName.value),
 );
-const selectedSchemaFields = computed(() => selectedDataType.value?.fields ?? []);
-const sampleCsv = computed(() => sampleCsvByType[selectedDataTypeName.value] ?? "");
+const selectedSchemaFields = computed(
+  () => selectedDataType.value?.fields ?? [],
+);
+const sampleCsv = computed(
+  () => sampleCsvByType[selectedDataTypeName.value] ?? "",
+);
 const hasResult = computed(() => Boolean(result.value));
 const hasValidationErrors = computed(() => result.value?.errors?.length > 0);
 const uploadDisabled = computed(() => !selectedFile.value || isUploading.value);
-const themeLabel = computed(() => isDarkMode.value ? "Light mode" : "Dark mode");
+const themeLabel = computed(() =>
+  isDarkMode.value ? "Light mode" : "Dark mode",
+);
 const importedTotal = computed(() => {
   if (!statistics.value) {
     return 0;
@@ -182,7 +188,9 @@ async function fetchRecords() {
 
   try {
     const endpoint = endpointByType[selectedDataTypeName.value];
-    const response = await fetch(`${endpoint}?page=0&size=5&sortBy=id&sortDir=desc`);
+    const response = await fetch(
+      `${endpoint}?page=0&size=5&sortBy=id&sortDir=desc`,
+    );
     if (!response.ok) {
       throw new Error("Could not load records");
     }
@@ -210,10 +218,13 @@ async function uploadFile() {
   const fileName = selectedFile.value.name;
 
   try {
-    const response = await fetch(`/api/automotive/upload/${selectedDataTypeName.value}`, {
-      method: "POST",
-      body: formData,
-    });
+    const response = await fetch(
+      `/api/automotive/upload/${selectedDataTypeName.value}`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
     const payload = await response.json();
     result.value = payload;
@@ -226,7 +237,8 @@ async function uploadFile() {
       await refreshDashboard();
     }
   } catch {
-    errorMessage.value = "The API is not reachable. Check that the backend is running.";
+    errorMessage.value =
+      "The API is not reachable. Check that the backend is running.";
   } finally {
     isUploading.value = false;
   }
@@ -242,12 +254,8 @@ function toggleTheme() {
     <section class="hero-panel">
       <div class="page-frame hero-layout">
         <div class="hero-copy">
-          <p class="eyebrow">
-            Data Platform
-          </p>
-          <h1>
-            Automotive data ingestion console
-          </h1>
+          <p class="eyebrow">Data Platform</p>
+          <h1>Automotive data ingestion console</h1>
           <p class="hero-text">
             Load dealer, vehicle, warranty, fleet, and service feeds into the
             ETL pipeline, review validation output, and inspect the latest
@@ -264,7 +272,10 @@ function toggleTheme() {
             <div class="status-value">
               <div
                 class="status-dot"
-                :class="[healthStatusColor, healthStatus === 'Checking' ? 'animate-pulse' : '']"
+                :class="[
+                  healthStatusColor,
+                  healthStatus === 'Checking' ? 'animate-pulse' : '',
+                ]"
               ></div>
               <p>
                 {{ healthStatus }}
@@ -301,9 +312,7 @@ function toggleTheme() {
               <FileSpreadsheet class="icon-small" />
               CSV import
             </div>
-            <h2>
-              Upload automotive source data
-            </h2>
+            <h2>Upload automotive source data</h2>
           </div>
           <label class="field-label">
             Data type
@@ -449,10 +458,7 @@ function toggleTheme() {
             <table>
               <thead>
                 <tr>
-                  <th
-                    v-for="column in recordColumns"
-                    :key="column"
-                  >
+                  <th v-for="column in recordColumns" :key="column">
                     {{ column }}
                   </th>
                 </tr>
@@ -468,11 +474,7 @@ function toggleTheme() {
                     No records found for this data type.
                   </td>
                 </tr>
-                <tr
-                  v-for="record in records"
-                  v-else
-                  :key="record.id"
-                >
+                <tr v-for="record in records" v-else :key="record.id">
                   <td
                     v-for="column in recordColumns"
                     :key="column"
