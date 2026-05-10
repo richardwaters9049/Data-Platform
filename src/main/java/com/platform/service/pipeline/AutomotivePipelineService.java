@@ -170,9 +170,7 @@ public class AutomotivePipelineService {
                 // Handle dealer relationship if dealer code is present
                 if (vehicle.getDealer() != null && vehicle.getDealer().getCode() != null) {
                     Dealer dealer = dealerRepository.findByCode(vehicle.getDealer().getCode());
-                    if (dealer != null) {
-                        vehicle.setDealer(dealer);
-                    }
+                    vehicle.setDealer(dealer);
                 }
                 vehicleRepository.save(vehicle);
             }
@@ -182,9 +180,7 @@ public class AutomotivePipelineService {
                 // Handle vehicle relationship if VIN is present
                 if (warranty.getVehicle() != null && warranty.getVehicle().getVin() != null) {
                     Vehicle vehicle = vehicleRepository.findByVin(warranty.getVehicle().getVin());
-                    if (vehicle != null) {
-                        warranty.setVehicle(vehicle);
-                    }
+                    warranty.setVehicle(vehicle);
                 }
                 warrantyRepository.save(warranty);
             }
@@ -194,15 +190,11 @@ public class AutomotivePipelineService {
                 // Handle vehicle and dealer relationships
                 if (service.getVehicle() != null && service.getVehicle().getVin() != null) {
                     Vehicle vehicle = vehicleRepository.findByVin(service.getVehicle().getVin());
-                    if (vehicle != null) {
-                        service.setVehicle(vehicle);
-                    }
+                    service.setVehicle(vehicle);
                 }
                 if (service.getDealer() != null && service.getDealer().getCode() != null) {
                     Dealer dealer = dealerRepository.findByCode(service.getDealer().getCode());
-                    if (dealer != null) {
-                        service.setDealer(dealer);
-                    }
+                    service.setDealer(dealer);
                 }
                 serviceRepository.save(service);
             }

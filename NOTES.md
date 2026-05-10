@@ -4,6 +4,16 @@
 
 ---
 
+### **00:56** - Review findings fixed for relationship persistence and Redis configuration
+
+Fixed the first review step by updating automotive relationship persistence. Vehicle, warranty, and service-record imports now clear unresolved dealer or vehicle placeholders when the referenced dealer code or VIN does not already exist, preventing JPA transient object failures while still allowing valid rows to import.
+
+Restored the local Redis default to `localhost:56379` so running the backend from the host matches the Docker Compose port mapping. Docker Compose still passes `REDIS_PORT=6379` to the backend container, which is correct for container-to-container communication on the internal Docker network.
+
+Removed the explicit Hibernate PostgreSQL dialect override because Spring Boot can detect it automatically from the configured database. `docker compose config` passed, and `./mvnw test` passed with 3 tests and 0 failures.
+
+---
+
 ### **00:52** - Current project status and latest technical changes
 
 The project is now an automotive ETL data platform with a Spring Boot backend, Vue/Tailwind frontend, PostgreSQL persistence, Redis-backed statistics caching, Docker Compose orchestration, and sample automotive CSV files for vehicles and dealers. The application has moved beyond a generic CSV uploader and now demonstrates a clearer industry-style data workflow: ingest automotive CSV data, validate rows, transform values, persist accepted records, expose API endpoints, and serve operational data to the frontend.
@@ -20,7 +30,7 @@ Current architecture includes explicit ETL stages:
 
 Latest technical changes add relationship mapping during transformation. Vehicle imports can now carry a dealer code, warranty imports can carry a VIN, and service record imports can carry both VIN and dealer code so the persistence layer can connect records to existing vehicles and dealers where possible. Application configuration was also adjusted for Redis and Hibernate PostgreSQL dialect settings.
 
-Review follow-up needed before committing as final: unresolved dealer/vehicle relationship placeholders should be cleared when a matching existing entity is not found, otherwise JPA may fail on transient related objects. The local Redis default should also stay aligned with the Compose host port when running the backend outside Docker.
+Review follow-up identified at this point: unresolved dealer/vehicle relationship placeholders should be cleared when a matching existing entity is not found, otherwise JPA may fail on transient related objects. The local Redis default should also stay aligned with the Compose host port when running the backend outside Docker.
 
 ## **30/04/2026**
 
