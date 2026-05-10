@@ -4,6 +4,28 @@
 
 ---
 
+### **03:32** - Frontend code refactored into modular composables
+
+Refactored the Vue frontend to improve code organization and maintainability by extracting logic into separate composable files and constants.
+
+**New Folder Structure:**
+
+- `frontend/src/constants/dataConstants.js` - Contains sampleCsvByType, endpointByType, and recordColumnsByType
+- `frontend/src/composables/useTheme.js` - Theme management (isDarkMode, themeLabel, toggleTheme)
+- `frontend/src/composables/useApi.js` - API health check (healthStatus, checkHealth)
+- `frontend/src/composables/useDataTypes.js` - Data type selection, schema fields, and computed properties
+- `frontend/src/composables/useFileUpload.js` - File upload logic and validation
+- `frontend/src/composables/useDashboard.js` - Dashboard statistics and records management
+
+**App.vue** now imports and uses these composables instead of having all logic inline, following Vue 3 composition API best practices.
+
+**Verification:**
+
+- `npm run build` completed successfully with no errors
+- All functionality preserved while improving code organization
+
+---
+
 ### **02:03** - Dashboard palette moved to dark blue
 
 Adjusted the dashboard theme away from green/teal and into a darker blue product palette. The updated styling uses navy backgrounds, blue brand accents, blue schema chips, and a warmer gold accent for contrast while keeping success/error colours readable.

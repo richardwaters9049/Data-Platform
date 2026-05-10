@@ -15,87 +15,56 @@ import {
   Upload,
   XCircle,
 } from "lucide-vue-next";
+import { useTheme } from "./composables/useTheme";
+import { useApi } from "./composables/useApi";
+import { useDataTypes } from "./composables/useDataTypes";
+import { useFileUpload } from "./composables/useFileUpload";
+import { useDashboard } from "./composables/useDashboard";
 
-const isDarkMode = ref(false);
-const dataTypes = ref([]);
-const selectedDataTypeName = ref("VEHICLE");
-const selectedFile = ref(null);
-const result = ref(null);
-const errorMessage = ref("");
-const successMessage = ref("");
-const isUploading = ref(false);
-const isLoadingDataTypes = ref(false);
-const isLoadingRecords = ref(false);
-const healthStatus = ref("Not checked");
-const statistics = ref(null);
-const records = ref([]);
 const validationErrorsSection = ref(null);
 
-const sampleCsvByType = {
-  VEHICLE: `vin,make,model,year,trim,color,fuelType,transmission,engineSize,bodyStyle,dealerCode,status
-SALAB2BN1HH123456,Jaguar,F-Pace,2024,R-Dynamic,Blue,Petrol,Automatic,2.0,SUV,DLR001,Active`,
-  DEALER: `code,name,address,city,state,zipCode,phone,email,website,status
-DLR001,North Wales Jaguar,Parc Menai,Bangor,Gwynedd,LL57 4BN,01248 000000,ops@nwjaguar.example,nwjaguar.example,Active`,
-  WARRANTY: `warrantyNumber,warrantyType,startDate,endDate,mileageLimit,coverage,deductible,vin,provider,status
-WRN-1001,Extended,2026-01-01,2029-01-01,60000,Powertrain,250,SALAB2BN1HH123456,Manufacturer,Active`,
-  FLEET: `fleetCode,fleetName,company,address,city,state,zipCode,contactPerson,contactPhone,contactEmail,vehicleCount,status
-FLT001,Executive Vehicles,Example Logistics,Parc Menai,Bangor,Gwynedd,LL57 4BN,A Morgan,01248 111111,fleet@example.com,24,Active`,
-  SERVICE_RECORD: `serviceNumber,serviceType,serviceDate,mileage,description,cost,vin,dealerCode,technician,status
-SRV-1001,Oil Change,2026-02-14,12000,Scheduled service,189.99,SALAB2BN1HH123456,DLR001,A Morgan,Completed`,
-};
+// Theme composable
+const { isDarkMode, themeLabel, toggleTheme } = useTheme();
 
-const endpointByType = {
-  VEHICLE: "/api/records/vehicles",
-  DEALER: "/api/records/dealers",
-  WARRANTY: "/api/records/warranties",
-  FLEET: "/api/records/fleets",
-  SERVICE_RECORD: "/api/records/services",
-};
+// API composable
+const { healthStatus, checkHealth } = useApi();
 
-const selectedDataType = computed(() =>
-  dataTypes.value.find((type) => type.name === selectedDataTypeName.value),
-);
-const selectedSchemaFields = computed(
-  () => selectedDataType.value?.fields ?? [],
-);
-const sampleCsv = computed(
-  () => sampleCsvByType[selectedDataTypeName.value] ?? "",
-);
-const hasResult = computed(() => Boolean(result.value));
-const hasValidationErrors = computed(() => result.value?.errors?.length > 0);
-const uploadDisabled = computed(() => !selectedFile.value || isUploading.value);
-const themeLabel = computed(() =>
-  isDarkMode.value ? "Light mode" : "Dark mode",
-);
-const importedTotal = computed(() => {
-  if (!statistics.value) {
-    return 0;
-  }
+// Data types composable
+const {
+  dataTypes,
+  selectedDataTypeName,
+  selectedDataType,
+  selectedSchemaFields,
+  sampleCsv,
+  recordColumns,
+  isLoadingDataTypes,
+  fetchDataTypes,
+} = useDataTypes();
 
-  return [
-    statistics.value.totalVehicles,
-    statistics.value.totalDealers,
-    statistics.value.totalWarranties,
-    statistics.value.totalFleets,
-    statistics.value.totalServices,
-  ].reduce((total, value) => total + Number(value ?? 0), 0);
-});
+// File upload composable
+const {
+  selectedFile,
+  result,
+  errorMessage,
+  successMessage,
+  isUploading,
+  hasResult,
+  hasValidationErrors,
+  uploadDisabled,
+  handleFileChange,
+  uploadFile,
+} = useFileUpload(selectedDataTypeName, selectedDataType);
 
-const recordColumns = computed(() => {
-  switch (selectedDataTypeName.value) {
-    case "DEALER":
-      return ["code", "name", "city", "status"];
-    case "WARRANTY":
-      return ["warrantyNumber", "warrantyType", "provider", "status"];
-    case "FLEET":
-      return ["fleetCode", "fleetName", "company", "status"];
-    case "SERVICE_RECORD":
-      return ["serviceNumber", "serviceType", "technician", "status"];
-    case "VEHICLE":
-    default:
-      return ["vin", "make", "model", "status"];
-  }
-});
+// Dashboard composable
+const {
+  statistics,
+  records,
+  isLoadingRecords,
+  importedTotal,
+  fetchStatistics,
+  fetchRecords,
+  refreshDashboard,
+} = useDashboard();
 
 const healthStatusColor = computed(() => {
   switch (healthStatus.value) {
@@ -127,126 +96,20 @@ watch(selectedDataTypeName, () => {
   errorMessage.value = "";
   successMessage.value = "";
   selectedFile.value = null;
-  fetchRecords();
+  fetchRecords(selectedDataTypeName);
 });
+
+const setErrorMessage = (msg) => {
+  errorMessage.value = msg;
+};
 
 onMounted(async () => {
-  await Promise.all([checkHealth(), fetchDataTypes(), refreshDashboard()]);
+  await Promise.all([
+    checkHealth(),
+    fetchDataTypes(setErrorMessage),
+    refreshDashboard(selectedDataTypeName),
+  ]);
 });
-
-function handleFileChange(event) {
-  selectedFile.value = event.target.files?.[0] ?? null;
-  result.value = null;
-  errorMessage.value = "";
-  successMessage.value = "";
-}
-
-async function checkHealth() {
-  healthStatus.value = "Checking";
-
-  try {
-    const response = await fetch("/health");
-    healthStatus.value = response.ok ? "Online" : "Unavailable";
-  } catch {
-    healthStatus.value = "Unavailable";
-  }
-}
-
-async function fetchDataTypes() {
-  isLoadingDataTypes.value = true;
-
-  try {
-    const response = await fetch("/api/automotive/data-types");
-    if (!response.ok) {
-      throw new Error("Could not load data types");
-    }
-    dataTypes.value = await response.json();
-  } catch {
-    errorMessage.value = "Automotive data types could not be loaded.";
-  } finally {
-    isLoadingDataTypes.value = false;
-  }
-}
-
-async function refreshDashboard() {
-  await Promise.all([fetchStatistics(), fetchRecords()]);
-}
-
-async function fetchStatistics() {
-  try {
-    const response = await fetch("/api/records/statistics/overall");
-    if (response.ok) {
-      statistics.value = await response.json();
-    }
-  } catch {
-    statistics.value = null;
-  }
-}
-
-async function fetchRecords() {
-  isLoadingRecords.value = true;
-
-  try {
-    const endpoint = endpointByType[selectedDataTypeName.value];
-    const response = await fetch(
-      `${endpoint}?page=0&size=5&sortBy=id&sortDir=desc`,
-    );
-    if (!response.ok) {
-      throw new Error("Could not load records");
-    }
-    const payload = await response.json();
-    records.value = payload.content ?? [];
-  } catch {
-    records.value = [];
-  } finally {
-    isLoadingRecords.value = false;
-  }
-}
-
-async function uploadFile() {
-  if (!selectedFile.value) {
-    return;
-  }
-
-  isUploading.value = true;
-  result.value = null;
-  errorMessage.value = "";
-  successMessage.value = "";
-
-  const formData = new FormData();
-  formData.append("file", selectedFile.value);
-  const fileName = selectedFile.value.name;
-
-  try {
-    const response = await fetch(
-      `/api/automotive/upload/${selectedDataTypeName.value}`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-
-    const payload = await response.json();
-    result.value = payload;
-
-    if (!response.ok && !payload.errors?.length) {
-      errorMessage.value = "The import could not be completed.";
-    } else {
-      successMessage.value = `${fileName} processed as ${selectedDataType.value?.displayName ?? selectedDataTypeName.value}. ${payload.rowsImported} rows imported, ${payload.rowsRejected} rejected.`;
-      selectedFile.value = null;
-      await refreshDashboard();
-    }
-  } catch {
-    errorMessage.value =
-      "The API is not reachable. Check that the backend is running.";
-  } finally {
-    isUploading.value = false;
-  }
-}
-
-function toggleTheme() {
-  isDarkMode.value = !isDarkMode.value;
-}
 </script>
 
 <template>
@@ -355,7 +218,12 @@ function toggleTheme() {
               class="button button-primary upload-button"
               type="button"
               :disabled="uploadDisabled"
-              @click="uploadFile"
+              @click="
+                () =>
+                  uploadFile(selectedDataTypeName, selectedDataType, () =>
+                    refreshDashboard(selectedDataTypeName),
+                  )
+              "
             >
               <Loader2 v-if="isUploading" class="icon-small animate-spin" />
               <Upload v-else class="icon-small" />
@@ -436,7 +304,7 @@ function toggleTheme() {
             <button
               class="button button-outline"
               type="button"
-              @click="refreshDashboard"
+              @click="() => refreshDashboard(selectedDataTypeName)"
             >
               <RefreshCw class="icon-tiny" />
               Refresh
