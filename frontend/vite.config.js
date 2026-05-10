@@ -7,6 +7,7 @@ const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? "http://localhost:80
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  root: ".",
   server: {
     port: 5173,
     proxy: {

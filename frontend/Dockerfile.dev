@@ -7,7 +7,7 @@ RUN bun install --frozen-lockfile
 
 COPY index.html vite.config.js ./
 
-# Don't copy src here - it will be mounted as a volume for hot reloading
+# Don't copy app here - it will be mounted as a volume for hot reloading
 
 EXPOSE 5173 24678
 

@@ -6,7 +6,7 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 COPY index.html vite.config.js ./
-COPY src ./src
+COPY app ./app
 
 EXPOSE 5173
 

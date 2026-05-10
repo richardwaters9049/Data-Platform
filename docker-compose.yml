@@ -41,7 +41,7 @@ services:
       - "5173:5173"
       - "24678:24678" # Vite HMR WebSocket port
     volumes:
-      - ./frontend/src:/app/src # Mount source code for hot reloading
+      - ./frontend/app:/app/app # Mount source code for hot reloading
       - ./frontend/package.json:/app/package.json
       - ./frontend/bun.lock:/app/bun.lock
     depends_on:
