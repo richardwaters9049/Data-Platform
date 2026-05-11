@@ -105,10 +105,9 @@ public class AutomotivePipelineService {
         String[] parts = ingestionService.parseCsvStructure(rawRow, dataType);
         if (parts == null) {
             String[] expectedFields = dataType.getSchemaFields();
-            String actualColumns = String.format("Found %d columns", rawRow.split(",").length);
-            errors.add(ImportError.withColumn(rowNumber, "row", 
-                String.format("CSV structure error: Expected %d columns (%s) but %s", 
-                    expectedFields.length, String.join(",", expectedFields), actualColumns), 
+            int actualCount = rawRow.split(",").length;
+            errors.add(ImportError.withColumn(rowNumber, "row",
+                String.format("Expected %d columns, found %d", expectedFields.length, actualCount),
                 "CSV Structure", rawRow));
             return PipelineResult.failure(errors);
         }
@@ -170,11 +169,18 @@ public class AutomotivePipelineService {
                 // Handle dealer relationship if dealer code is present
                 if (vehicle.getDealer() != null && vehicle.getDealer().getCode() != null) {
                     Dealer dealer = dealerRepository.findByCode(vehicle.getDealer().getCode());
-                    vehicle.setDealer(dealer);
+                    if (dealer != null) {
+                        vehicle.setDealer(dealer);
+                    }
                 }
                 vehicleRepository.save(vehicle);
             }
-            case DEALER -> dealerRepository.save((Dealer) entity);
+            case DEALER -> {
+                Dealer dealer = (Dealer) entity;
+                if (dealer != null) {
+                    dealerRepository.save(dealer);
+                }
+            }
             case WARRANTY -> {
                 Warranty warranty = (Warranty) entity;
                 // Handle vehicle relationship if VIN is present
@@ -184,7 +190,12 @@ public class AutomotivePipelineService {
                 }
                 warrantyRepository.save(warranty);
             }
-            case FLEET -> fleetRepository.save((Fleet) entity);
+            case FLEET -> {
+                Fleet fleet = (Fleet) entity;
+                if (fleet != null) {
+                    fleetRepository.save(fleet);
+                }
+            }
             case SERVICE_RECORD -> {
                 ServiceRecord service = (ServiceRecord) entity;
                 // Handle vehicle and dealer relationships
@@ -194,7 +205,9 @@ public class AutomotivePipelineService {
                 }
                 if (service.getDealer() != null && service.getDealer().getCode() != null) {
                     Dealer dealer = dealerRepository.findByCode(service.getDealer().getCode());
-                    service.setDealer(dealer);
+                    if (dealer != null) {
+                        service.setDealer(dealer);
+                    }
                 }
                 serviceRepository.save(service);
             }

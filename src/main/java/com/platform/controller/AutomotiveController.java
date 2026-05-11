@@ -27,10 +27,21 @@ public class AutomotiveController {
             @PathVariable DataType dataType,
             @RequestParam("file") MultipartFile file) throws Exception {
         
+        if (file.isEmpty()) {
+            ImportResult errorResult = new ImportResult(0, 0, 0, 
+                List.of(new com.platform.dto.ImportError(0, "file", "The uploaded file is empty")));
+            return ResponseEntity.badRequest().body(errorResult);
+        }
+        
         ImportResult result = pipelineService.runPipeline(file, dataType);
 
         if (!result.hasErrors() && result.rowsImported() == 0) {
-            return ResponseEntity.badRequest().body(result);
+            ImportResult errorResult = new ImportResult(
+                result.rowsRead(), result.rowsImported(), result.rowsRejected(),
+                List.of(new com.platform.dto.ImportError(0, "file", 
+                    "No rows were imported. File may be empty or have incorrect format. Rows read: " + result.rowsRead()))
+            );
+            return ResponseEntity.badRequest().body(errorResult);
         }
 
         return ResponseEntity.ok(result);

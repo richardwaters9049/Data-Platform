@@ -1,0 +1,6 @@
+warrantyNumber,warrantyType,startDate,endDate,mileageLimit,coverage,deductible,vin,provider,status
+WRNT001,Extended,2023-01-15,2028-01-15,100000,Comprehensive,0.00,1HGCM82633A004352,Premium Auto Warranty,ACTIVE
+WRNT002,Powertrain,2022-06-01,2025-06-01,60000,Powertrain Only,100.00,2T3BF4DV9AR123456,Factory Warranty,ACTIVE
+WRNT003,Bumper-to-Bumper,2023-03-10,2026-03-10,36000,Comprehensive,50.00,5YJ3E1EA5JF123456,Tesla Protection,ACTIVE
+WRNT004,Extended,2020-07-20,2025-07-20,75000,Comprehensive,75.00,1FTFW1ET5DFC12345,Ford Protect,EXPIRED
+WRNT005,Powertrain,2021-11-05,2026-11-05,50000,Powertrain Only,0.00,JTDKB20U993045678,Toyota Care,ACTIVE

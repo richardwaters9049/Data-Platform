@@ -117,8 +117,8 @@ onMounted(async () => {
     <section class="hero-panel">
       <div class="page-frame hero-layout">
         <div class="hero-copy">
-          <p class="eyebrow">Data Platform</p>
-          <h1>Automotive data ingestion console</h1>
+          <h1>Data Platform</h1>
+          <p class="hero-subtitle">Automotive data ingestion console</p>
           <p class="hero-text">
             Load dealer, vehicle, warranty, fleet, and service feeds into the
             ETL pipeline, review validation output, and inspect the latest
@@ -171,11 +171,11 @@ onMounted(async () => {
       <div class="panel import-panel">
         <div class="panel-header">
           <div>
-            <div class="eyebrow inline-eyebrow">
+            <h2 class="inline-eyebrow">
               <FileSpreadsheet class="icon-small" />
               CSV import
-            </div>
-            <h2>Upload automotive source data</h2>
+            </h2>
+            <p class="panel-subtitle">Upload automotive source data</p>
           </div>
           <label class="field-label">
             Data type
@@ -196,8 +196,8 @@ onMounted(async () => {
         </div>
 
         <div class="import-grid">
-          <div>
-            <label class="drop-zone">
+          <div class="upload-section">
+            <label class="drop-zone compact">
               <Upload class="drop-icon" />
               <span class="drop-title">
                 {{ selectedFile ? selectedFile.name : "Choose a CSV file" }}
@@ -219,10 +219,7 @@ onMounted(async () => {
               type="button"
               :disabled="uploadDisabled"
               @click="
-                () =>
-                  uploadFile(selectedDataTypeName, selectedDataType, () =>
-                    refreshDashboard(selectedDataTypeName),
-                  )
+                () => uploadFile(() => refreshDashboard(selectedDataTypeName))
               "
             >
               <Loader2 v-if="isUploading" class="icon-small animate-spin" />
@@ -231,7 +228,7 @@ onMounted(async () => {
             </button>
           </div>
 
-          <div class="code-panel">
+          <div class="code-panel expanded">
             <div class="code-heading">
               <ClipboardList class="icon-small" />
               <span>Expected schema</span>
@@ -249,7 +246,7 @@ onMounted(async () => {
               <ClipboardList class="icon-small" />
               <span>Sample feed</span>
             </div>
-            <pre>{{ sampleCsv }}</pre>
+            <pre class="sample-feed">{{ sampleCsv }}</pre>
           </div>
         </div>
       </div>

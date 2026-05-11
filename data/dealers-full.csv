@@ -1,0 +1,7 @@
+code,name,address,city,state,zipCode,phone,email,website,status
+DEAL001,Downtown Auto Sales,123 Main St,New York,NY,10001,555-1000,sales@downtownauto.com,www.downtownauto.com,ACTIVE
+DEAL002,Westside Motors,456 Oak Ave,Los Angeles,CA,90001,555-2000,info@westsidemotors.com,www.westsidemotors.com,ACTIVE
+DEAL003,Lakeside Chevrolet,789 Lake Rd,Chicago,IL,60601,555-3000,sales@lakesidechevy.com,www.lakesidechevy.com,ACTIVE
+DEAL004,Capital Honda,1000 Capitol Blvd,Austin,TX,78701,555-4000,service@capitalhonda.com,www.capitalhonda.com,ACTIVE
+DEAL005,Sunset Ford,2000 Sunset Dr,Miami,FL,33101,555-5000,sales@sunsetford.com,www.sunsetford.com,INACTIVE
+DEAL006,Mountain Toyota,3000 Peak Rd,Denver,CO,80201,555-6000,info@mountaintoyota.com,www.mountaintoyota.com,ACTIVE

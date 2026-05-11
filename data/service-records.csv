@@ -1,0 +1,6 @@
+serviceNumber,serviceType,serviceDate,mileage,description,cost,vin,dealerCode,technician,status
+SVC001,Oil Change,2024-01-15,5000,Standard synthetic oil change and filter replacement,79.99,1HGCM82633A004352,DEAL001,Mike Torres,COMPLETED
+SVC002,Tire Rotation,2024-02-20,8000,Rotate and balance all four tires,49.99,2T3BF4DV9AR123456,DEAL002,Lisa Park,COMPLETED
+SVC003,Brake Service,2024-03-05,25000,Replace front brake pads and resurface rotors,299.99,1FTFW1ET5DFC12345,DEAL001,James Wilson,COMPLETED
+SVC004,Battery Replacement,2024-01-30,35000,Replace 12V battery and test charging system,189.99,JTDKB20U993045678,DEAL002,Ana Rodriguez,COMPLETED
+SVC005,Warranty Repair,2024-04-10,12000,Replace faulty infotainment system under warranty,0.00,1HGCM82633A004352,DEAL001,Mike Torres,COMPLETED

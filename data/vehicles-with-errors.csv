@@ -1,0 +1,7 @@
+vin,make,model,year,trim,color,fuelType,transmission,engineSize,bodyStyle,dealerCode,status
+INVALID,Honda,Civic,2022,EX,Black,Gasoline,CVT,1.5,Sedan,DEAL001,NEW
+1HGCM82633A004353,Civic,2022,LX,White,Gasoline,CVT,1.5,Sedan,DEAL001,USED
+,Toyota,Camry,2024,SE,Red,Gasoline,Automatic,2.5,Sedan,DEAL002,NEW
+3KPF34AD5PE123456,Kia,Sportage,1800,LX,Blue,Gasoline,Automatic,2.0,SUV,DEAL003,NEW
+5YJ3E1EA5JF123457,Tesla,Model Y,2023,Long Range,Silver,Electric,Automatic,,SUV,DEAL004,NEW
+1FTFW1ET5DFC12346,Ford,F-150,2020,Platinum,Black,Gasoline,10-Speed,5.0,Truck,DEAL005,USED

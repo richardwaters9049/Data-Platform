@@ -18,8 +18,14 @@ export function useFileUpload(selectedDataTypeName, selectedDataType) {
     successMessage.value = "";
   }
 
-  async function uploadFile(selectedDataTypeName, selectedDataType, refreshDashboard) {
+  async function uploadFile(refreshDashboard) {
     if (!selectedFile.value) {
+      return;
+    }
+
+    const dataTypeName = selectedDataTypeName?.value;
+    if (!dataTypeName) {
+      errorMessage.value = "Please select a data type before uploading.";
       return;
     }
 
@@ -34,7 +40,7 @@ export function useFileUpload(selectedDataTypeName, selectedDataType) {
 
     try {
       const response = await fetch(
-        `/api/automotive/upload/${selectedDataTypeName.value}`,
+        `/api/automotive/upload/${dataTypeName}`,
         {
           method: "POST",
           body: formData,
@@ -44,14 +50,20 @@ export function useFileUpload(selectedDataTypeName, selectedDataType) {
       const payload = await response.json();
       result.value = payload;
 
-      if (!response.ok && !payload.errors?.length) {
-        errorMessage.value = "The import could not be completed.";
+      if (!response.ok) {
+        if (payload.errors?.length) {
+          errorMessage.value = `Import completed with ${payload.errors.length} validation errors.`;
+        } else {
+          errorMessage.value = payload.message || `Import failed: ${response.status} ${response.statusText}`;
+        }
       } else {
-        successMessage.value = `${fileName} processed as ${selectedDataType.value?.displayName ?? selectedDataTypeName.value}. ${payload.rowsImported} rows imported, ${payload.rowsRejected} rejected.`;
+        const displayName = selectedDataType?.value?.displayName;
+        successMessage.value = `${fileName} processed as ${displayName ?? dataTypeName}. ${payload.rowsImported} rows imported, ${payload.rowsRejected} rejected.`;
         selectedFile.value = null;
         await refreshDashboard();
       }
-    } catch {
+    } catch (err) {
+      console.error("Upload error:", err);
       errorMessage.value =
         "The API is not reachable. Check that the backend is running.";
     } finally {
