@@ -2,7 +2,7 @@
 
 A containerised ETL platform that ingests CSV automotive data, validates it, applies transformations, stores it in PostgreSQL, and serves it via a cached API.
 
-The platform implements a complete Extract-Transform-Load pipeline with robust data quality controls, real-time statistics, and production-grade reliability for automotive industry data workflows.
+The platform implements a complete Extract-Transform-Load pipeline with robust data quality controls, real-time statistics, and production-grade reliability for automotive industry data workflows. Features include animated UI components, enhanced error reporting, and smooth user interactions.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ Then open:
 
 The command builds and starts the Vue frontend, Spring Boot backend, PostgreSQL database, and Redis cache. No local Java, Maven, Bun, PostgreSQL, or Redis setup is required for the standard Docker run.
 
-## Table of Contents
+### Table of Contents
 
 - [Overview](#overview)
 - [Quick Start](#quick-start)
@@ -48,7 +48,7 @@ The Automotive ETL Data Platform is a production-grade data integration system d
 - **Data Quality**: Row-level validation with detailed error reporting and partial success handling
 - **Reliable Storage**: PostgreSQL with proper indexing and data integrity
 - **Real-time Serving**: Redis-powered caching for high-performance data access
-- **Pipeline Interface**: Vue.js frontend for monitoring and interacting with the ETL pipeline
+- **Pipeline Interface**: Vue.js frontend with animated components for monitoring and interacting with the ETL pipeline
 
 The platform is built with production-grade patterns including validation-first ingestion, cache invalidation strategies, idempotent operations, and scalable containerised deployment.
 
@@ -62,6 +62,7 @@ The platform is built with production-grade patterns including validation-first 
 - **Real-time Statistics**: Cached statistics for high-performance data access
 - **Data Management APIs**: CRUD operations for all data types with proper error handling
 - **Health Monitoring**: Application and database health checks for system reliability
+- **Enhanced UI**: Animated components with smooth scrolling and improved error display
 
 ### Data Domains Supported
 
@@ -600,6 +601,7 @@ The application uses JPA/Hibernate for automatic schema generation. Tables are c
 - [ ] Export functionality for all data types
 - [ ] Advanced filtering and search
 - [x] Basic data transformation pipeline (field normalisation, derived calculations)
+- [x] Enhanced UI with animated components and smooth scrolling
 
 ### Medium Term
 
