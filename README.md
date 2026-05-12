@@ -31,7 +31,6 @@ The command builds and starts the Vue frontend, Spring Boot backend, PostgreSQL 
 - [Architecture](#architecture)
 - [Production Considerations](#production-considerations)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [API Reference](#api-reference)
 - [Configuration](#configuration)
@@ -320,40 +319,6 @@ The platform is designed with production-grade engineering practices:
 | Containerization         | Docker, Docker Compose                      |
 | Testing                  | JUnit 5, Spring Boot Test, AssertJ, Mockito |
 
-## Project Structure
-
-```text
-.
-|-- Dockerfile                 # Spring Boot application container
-|-- .dockerignore             # Docker ignore patterns
-|-- docker-compose.yml        # Local development infrastructure
-|-- frontend/                 # Vue.js frontend application
-|   |-- Dockerfile           # Frontend container build
-|   |-- src/                 # Vue components and styles
-|   |-- package.json         # Frontend dependencies
-|   `-- bun.lock            # Bun package manager lock file
-|-- pom.xml                  # Maven build configuration
-|-- samples/                  # Sample CSV files for testing
-|   |-- automotive-contacts.csv
-|   |-- dealers.csv
-|   `-- vehicles.csv
-|-- src/                     # Java backend source code
-|   |-- main/
-|   |   |-- java/com/platform/
-|   |   |   |-- config/      # Spring configuration beans
-|   |   |   |-- controller/  # REST API endpoints
-|   |   |   |-- dto/         # Data transfer objects
-|   |   |   |-- model/       # JPA entity classes
-|   |   |   |-- repository/  # Spring Data repositories
-|   |   |   |-- service/     # Business logic services
-|   |   |   `-- DataPlatformApplication.java
-|   |   `-- resources/
-|   |       `-- application.yaml  # Application configuration
-|   `-- test/                # Unit and integration tests
-|       `-- java/com/platform/
-`-- NOTES.md                # Development notes and TODOs
-```
-
 ## Getting Started
 
 ### Prerequisites
@@ -361,43 +326,9 @@ The platform is designed with production-grade engineering practices:
 - Docker Desktop or Docker Engine
 - Git
 
-### One-Command Docker Run
+### Local Development
 
-From a fresh clone, start the complete platform with one command:
-
-```bash
-docker compose up --build
-```
-
-This builds and starts all services:
-
-- Spring Boot backend (port 8081)
-- Vue.js frontend (port 5173)
-- PostgreSQL database (port 55432)
-- Redis cache (port 56379)
-
-Use this as the default setup path for demonstrations, reviews, and first-time project runs.
-
-To stop the platform:
-
-```bash
-docker compose down
-```
-
-To stop the platform and remove local database/cache volumes:
-
-```bash
-docker compose down -v
-```
-
-### Access Points
-
-Once running, access the application at:
-
-- **Frontend Application**: <http://localhost:5173>
-- **Backend API**: <http://localhost:8081>
-- **Database**: localhost:55432
-- **Redis**: localhost:56379
+For day-to-day development, you can run services individually. This path requires Java 17, Maven wrapper, Bun, and Docker.
 
 ### Health Check
 
