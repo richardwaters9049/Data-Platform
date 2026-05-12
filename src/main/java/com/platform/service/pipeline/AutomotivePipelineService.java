@@ -107,7 +107,7 @@ public class AutomotivePipelineService {
             String[] expectedFields = dataType.getSchemaFields();
             int actualCount = rawRow.split(",").length;
             errors.add(ImportError.withColumn(rowNumber, "row",
-                String.format("Expected %d columns, found %d", expectedFields.length, actualCount),
+                String.format("CSV column count mismatch: Expected %d columns, found %d", expectedFields.length, actualCount),
                 "CSV Structure", rawRow));
             return PipelineResult.failure(errors);
         }

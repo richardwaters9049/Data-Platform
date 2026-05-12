@@ -483,3 +483,29 @@ Comprehensive codebase review and technical debt removal across all components.
 - All changes maintain backward compatibility
 - No functional changes to application behavior
 - Code compiles successfully with reduced warnings
+
+---
+
+### **03:58** - Validation Error Message Refinement and Scrolling Improvements
+
+Refined validation error messages and improved scrolling behavior for better user experience.
+
+**Backend Changes:**
+
+- `AutomotivePipelineService.java` - Updated CSV structure validation error message to be more explicit: "CSV column count mismatch: Expected %d columns, found %d"
+
+**Frontend Changes:**
+
+- `App.vue` - Modified scroll behavior for validation errors section to use `block: "center"` instead of `block: "start"` for smoother, centered scrolling
+
+**Benefits:**
+
+- Clearer error messages that don't include verbose schema information
+- Improved user experience with centered scrolling to validation errors
+- More intuitive error reporting format
+
+**Verification:**
+
+- Error messages are now concise and focused on the core issue
+- Scrolling to validation errors is smoother and centers the error section in view
+- Changes maintain backward compatibility

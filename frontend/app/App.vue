@@ -15,6 +15,7 @@ import {
   Upload,
   XCircle,
 } from "lucide-vue-next";
+import AnimatedSelect from "./components/AnimatedSelect.vue";
 import { useTheme } from "./composables/useTheme";
 import { useApi } from "./composables/useApi";
 import { useDataTypes } from "./composables/useDataTypes";
@@ -85,7 +86,7 @@ watch(hasValidationErrors, (hasErrors) => {
     nextTick(() => {
       validationErrorsSection.value?.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "center",
       });
     });
   }
@@ -114,7 +115,17 @@ onMounted(async () => {
 
 <template>
   <main class="app-shell" :class="{ 'theme-dark': isDarkMode }">
-    <section class="hero-panel">
+    <section
+      class="hero-panel"
+      v-motion
+      :initial="{ opacity: 0, y: 30, scale: 0.98 }"
+      :enter="{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 600, easing: 'ease-out' },
+      }"
+    >
       <div class="page-frame hero-layout">
         <div class="hero-copy">
           <h1>Data Platform</h1>
@@ -168,7 +179,16 @@ onMounted(async () => {
     </section>
 
     <section class="page-frame dashboard-grid">
-      <div class="panel import-panel">
+      <div
+        class="panel import-panel"
+        v-motion
+        :initial="{ opacity: 0, scale: 0.95 }"
+        :enter="{
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 500, delay: 150, easing: 'ease-out' },
+        }"
+      >
         <div class="panel-header">
           <div>
             <h2 class="inline-eyebrow">
@@ -179,19 +199,23 @@ onMounted(async () => {
           </div>
           <label class="field-label">
             Data type
-            <select
+            <AnimatedSelect
               v-model="selectedDataTypeName"
-              class="select-control"
+              :options="
+                dataTypes.map((dt) => ({
+                  value: dt.name,
+                  label: dt.displayName,
+                }))
+              "
               :disabled="isLoadingDataTypes"
-            >
-              <option
-                v-for="dataType in dataTypes"
-                :key="dataType.name"
-                :value="dataType.name"
-              >
-                {{ dataType.displayName }}
-              </option>
-            </select>
+              v-motion
+              :initial="{ opacity: 0, y: -10 }"
+              :enter="{
+                opacity: 1,
+                y: 0,
+                transition: { duration: 400, delay: 200, easing: 'ease-out' },
+              }"
+            />
           </label>
         </div>
 
@@ -235,9 +259,21 @@ onMounted(async () => {
             </div>
             <div class="schema-list">
               <span
-                v-for="field in selectedSchemaFields"
+                v-for="(field, index) in selectedSchemaFields"
                 :key="field"
                 class="schema-chip"
+                v-motion
+                :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+                :enter="{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  transition: {
+                    duration: 350,
+                    delay: 400 + index * 20,
+                    easing: 'ease-out',
+                  },
+                }"
               >
                 {{ field }}
               </span>
@@ -251,25 +287,74 @@ onMounted(async () => {
         </div>
       </div>
 
-      <aside class="side-stack">
-        <div class="panel summary-panel">
+      <aside
+        class="side-stack"
+        v-motion
+        :initial="{ opacity: 0, x: 30 }"
+        :enter="{
+          opacity: 1,
+          x: 0,
+          transition: { duration: 550, delay: 250, easing: 'ease-out' },
+        }"
+      >
+        <div
+          class="panel summary-panel"
+          v-motion
+          :initial="{ opacity: 0, scale: 0.9, y: 10 }"
+          :enter="{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            transition: { duration: 450, delay: 350, easing: 'ease-out' },
+          }"
+        >
           <div class="eyebrow inline-eyebrow">
             <Gauge class="icon-small" />
             Import summary
           </div>
 
           <div v-if="hasResult" class="metric-grid">
-            <div class="metric-tile neutral">
+            <div
+              class="metric-tile neutral"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+              :enter="{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 400, delay: 500, easing: 'ease-out' },
+              }"
+            >
               <p class="metric-label">Read</p>
               <p class="metric-value">{{ result.rowsRead }}</p>
             </div>
-            <div class="metric-tile success">
+            <div
+              class="metric-tile success"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+              :enter="{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 400, delay: 600, easing: 'ease-out' },
+              }"
+            >
               <p class="metric-label">Imported</p>
               <p class="metric-value">
                 {{ result.rowsImported }}
               </p>
             </div>
-            <div class="metric-tile warning">
+            <div
+              class="metric-tile warning"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+              :enter="{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 400, delay: 700, easing: 'ease-out' },
+              }"
+            >
               <p class="metric-label">Rejected</p>
               <p class="metric-value">
                 {{ result.rowsRejected }}
@@ -292,7 +377,17 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="panel snapshot-panel">
+        <div
+          class="panel snapshot-panel"
+          v-motion
+          :initial="{ opacity: 0, scale: 0.9, y: 10 }"
+          :enter="{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            transition: { duration: 450, delay: 450, easing: 'ease-out' },
+          }"
+        >
           <div class="section-toolbar">
             <div class="eyebrow inline-eyebrow">
               <Database class="icon-small" />
@@ -309,11 +404,31 @@ onMounted(async () => {
           </div>
 
           <div class="snapshot-stats">
-            <div class="snapshot-stat">
+            <div
+              class="snapshot-stat"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+              :enter="{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 400, delay: 550, easing: 'ease-out' },
+              }"
+            >
               <p>Stored rows</p>
               <strong>{{ importedTotal }}</strong>
             </div>
-            <div class="snapshot-stat">
+            <div
+              class="snapshot-stat"
+              v-motion
+              :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+              :enter="{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: { duration: 400, delay: 650, easing: 'ease-out' },
+              }"
+            >
               <p>Current view</p>
               <strong>{{ records.length }}</strong>
             </div>
