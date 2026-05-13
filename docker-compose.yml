@@ -1,3 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# SERVICE URLs (clickable after docker compose up):
+# ═══════════════════════════════════════════════════════════════════════════════
+# Frontend:         http://localhost:5173
+# Backend API:      http://localhost:8081
+# Backend Health:   http://localhost:8081/actuator/health
+# Postgres DB:      localhost:55432 (user: postgres, db: dataplatform)
+# Redis:            localhost:56379
+# ═══════════════════════════════════════════════════════════════════════════════
+
 services:
   # Spring Boot API container. It talks to Postgres and Redis over the Compose network.
   backend:
